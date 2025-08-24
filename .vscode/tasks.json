@@ -1,0 +1,108 @@
+/*
+1.与调试器集成：
+            如果你需要调试编译后的程序，可以配置 launch.json 来配合 tasks.json，例如指定 preLaunchTask 为 "Build with mingw32-make"，确保调试前自动编译。
+
+*/
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Flash with OpenOCD",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f",
+                "interface/cmsis-dap.cfg",
+                "-f",
+                "target/stm32f1x.cfg",
+                "-c",
+                "program obj/ylad_led_blink.elf verify reset exit"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "使用 OpenOCD 刷写程序到 STM32F1 芯片-Run openocd to flash the program to STM32F1 chip."
+        },
+        {
+            "label": "Rebuild with mingw32-make",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [
+                "clean",
+                "all"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "完全重新构建整个工程-Run mingw32-make clean all to rebuild the project."
+        },
+        {
+            "label": "Build with mingw32-make",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [
+                "-j20"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}" //指明命令在终端的哪个目录执行
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false // 该任务不是默认构建任务
+            },
+            "detail": "构建整个工程-Run mingw32-make to build the project based on Makefile."
+        },
+        {
+            "label": "Clean with mingw32-make",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [
+                "clean"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "删除.obj目录文件-Run mingw32-make clean to remove generated files."
+        },
+        {
+            "label": "Help with mingw32-make",
+            "type": "shell",
+            "command": "mingw32-make",
+            "args": [
+                "help"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "列出所有make目标-mingw32-make help to display help information."
+        }
+    ]
+}

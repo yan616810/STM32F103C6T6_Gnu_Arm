@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "STM32 GNU Arm",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                // "STM32F10X_LD",
+                // "USE_STDPERIPH_DRIVER"
+            ],
+            "compilerPath": "D:\\gnu-arm\\arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe",
+            "cStandard": "c11",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "windows-gcc-arm"
+        }
+    ],
+    "version": 4
+}
