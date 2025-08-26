@@ -29,7 +29,9 @@ CSRC =	\
 		$(wildcard *.c) \
     	$(wildcard start/*.c) \
     	$(wildcard SPL/STM32F10x_StdPeriph_Driver/src/*.c) \
-    	$(wildcard SPL/CMSIS/CM3/*.c)
+    	$(wildcard SPL/CMSIS/CM3/*.c) \
+		sys_hardware/USART.c \
+		sys_hardware/Delay.c \
 #匹配$(asrc/*.S)文件
 ASRC	=$(wildcard start/*.S)
 CSRCARM	=
@@ -46,6 +48,10 @@ INCDIRS := \
 			start/ \
 			SPL/STM32F10x_StdPeriph_Driver/inc/ \
 			SPL/CMSIS/CM3/ \
+			sys_hardware \
+			board_hardware \
+			protocol \
+			lib \
 
 
 ### Search directories (make uses VPATH to search source files)
@@ -54,7 +60,7 @@ vpath %.c $(sort $(dir $(CSRC)))#提取目录，sort去重
 
 
 ### Warning controls
-WARNINGS = all extra error unused
+WARNINGS = all extra unused # error
 
 ### Output file type (hex, bin or both) and debugger type
 OUTPUT	= hex
@@ -105,6 +111,7 @@ CFLAGS += -Wp,-MM,-MP,-MT,$(OBJDIR)/$(*F).o,-MF,$(OBJDIR)/$(*F).d#-Wp:表示将�
 CFLAGS += -fdiagnostics-color=always #始终使用错误颜色
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -Wa,-a,-ad,-alms=$(OBJDIR)/$(notdir $(<:.c=.lst))#查看单文件源码与汇编对应
+#gnu arm默认禁止宽字符，从而确保 printf 输出中文字符时以单字节形式（例如 UTF-8 或 GBK 编码的原始字节）发送到串口，而不是被解析为多字节字符。
 
 
 # Assembler flags
@@ -115,7 +122,8 @@ ASFLAGS += -ffunction-sections -fdata-sections
 # Linker flags
 # LDFLAGS += -nostartfiles -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections #-nostartfiles 是 GCC 前端选项，不在 binutils/ld 手册中
 LDFLAGS += -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections
-LDFLAGS += -specs=nano.specs # 使用类似微库的newlib-nano库
+LDFLAGS += -lc 
+# LDFLAGS += -specs=nano.specs # 使用类似微库的newlib-nano库
 # LDFLAGS += -lc_nano 你只需要选择 -specs=nano.specs 或 -lc_nano 其中之一即可指明使用的nano库;
 LDFLAGS += $(patsubst %,-L%,$(LIBDIRS)) $(patsubst %,-l%,$(LIBS))
 LDFLAGS += $(MATHLIB)
@@ -245,6 +253,7 @@ help :
 	@echo   bin       - Build BIN file
 	@echo   lst       - Generate listing file
 	@echo   sym       - Generate symbol file
+	@echo   flash     - Flash the program to the device
 	@echo ***********************************************
 	@echo *************all .c file with dir**************
 	@echo $(CSRC)
@@ -255,5 +264,7 @@ help :
 	@echo *******************vpath***********************
 	@echo $(sort $(dir $(CSRC)))
 
+flash : $(PROJECT_dir).elf
+	@openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg -c "program $< verify reset exit"
 
-.PHONY: all version build size elf hex bin lst sym clean help
+.PHONY: all version build size elf hex bin lst sym clean help flash

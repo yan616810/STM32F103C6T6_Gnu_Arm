@@ -63,7 +63,7 @@
             "showDevDebugOutput": "raw",                    //显示原始调试输出
             // "showDevDebugOutput": "parsed",                 // 显示解析后的调试输出，便于排查问题
             "svdFile": "${workspaceFolder}/STM32F103.svd", //外设视图文件
-            "executable"        : "obj/ylad_led_blink.elf",            //此处被arm-none-eabi-gdb.exe *.elf和(gdb)load使用，严格按照链接脚本中的运行时地址将固件存到芯片中(如.text>flash,.data>ram,.bss>ram中但.data>ram存到flash才适合我写的c启动文件),不支持通配符，要手动修改指定唯一的.elf文件
+            "executable"        : "obj/ylad_gps_oled.elf",            //此处被arm-none-eabi-gdb.exe *.elf和(gdb)load使用，严格按照链接脚本中的运行时地址将固件存到芯片中(如.text>flash,.data>ram,.bss>ram中但.data>ram存到flash才适合我写的c启动文件),不支持通配符，要手动修改指定唯一的.elf文件
         }
     ]
 }

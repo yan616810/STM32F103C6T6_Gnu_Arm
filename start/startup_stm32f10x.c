@@ -172,7 +172,7 @@ void Reset_Handler (void)
 	for (s = _sidata, d = _sdata; d < _edata; *d++ = *s++) ;
 	for (d = _sbss; d < _ebss; *d++ = 0) ;
 
-	/* Call newlib C++ global constructors ，典型的比如使用malloc时,newlib怎么会知道你定义的堆的地址在哪！所以要在这里进行初始化*/
+	/* Call newlib C++ global constructors ，负责初始化 Newlib 的运行时环境，包括标准 I/O 缓冲区;所以要在这里进行初始化*/
 	__libc_init_array();
 
 	/* Start main() with MSP and privileged mode */

@@ -10,7 +10,13 @@
         "string.h": "c",
         "_ansi.h": "c",
         "swi.h": "c",
-        "arm.h": "c"
+        "arm.h": "c",
+        "delay.h": "c",
+        "usart.h": "c",
+        "lwrb.h": "c",
+        "stddef.h": "c",
+        "rtc.h": "c",
+        "key.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": false
+    "cortex-debug.variableUseNaturalFormat": true
 }

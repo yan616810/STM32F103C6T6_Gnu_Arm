@@ -9,14 +9,9 @@
         {
             "label": "Flash with OpenOCD",
             "type": "shell",
-            "command": "openocd",
+            "command": "mingw32-make",
             "args": [
-                "-f",
-                "interface/cmsis-dap.cfg",
-                "-f",
-                "target/stm32f1x.cfg",
-                "-c",
-                "program obj/ylad_led_blink.elf verify reset exit"
+                "flash"
             ],
             "group": {
                 "kind": "build",

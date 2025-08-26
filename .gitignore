@@ -15,8 +15,8 @@ DebugConfig/
 *.axf
 *.crf
 *._2i
-*.log
-*.txt
+# *.log
+# *.txt
 *.bat
 *.scvd
 *.lock

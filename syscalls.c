@@ -1,6 +1,7 @@
 // /* Support files for GNU libc.  Files in the system namespace go here.
 //    Files in the C namespace (ie those that do not start with an
 //    underscore) go in .c.  */
+#include "USART.h"
 
 #include <_ansi.h>
 #include <sys/types.h>
@@ -32,14 +33,14 @@ register char * stack_ptr __asm__ ("sp");
 // int	_stat		(const char *, struct stat *);
 // int	_fstat		(int, struct stat *);
 // int	_swistat	(int fd, struct stat * st);
-// void *	_sbrk		(ptrdiff_t);
+void *	_sbrk		(ptrdiff_t);/* Heap management */
 // pid_t	_getpid		(void);
 // int	_close		(int);
 // clock_t	_clock		(void);
 // int	_swiclose	(int);
 // int	_open		(const char *, int, ...);
 // int	_swiopen	(const char *, int);
-// int	_write		(int, const void *, size_t);
+int	_write		(int, const void *, size_t);
 // int	_swiwrite	(int, const void *, size_t);
 // _off_t	_lseek		(int, _off_t, int);
 // _off_t	_swilseek	(int, _off_t, int);
@@ -80,3 +81,42 @@ void * _sbrk (ptrdiff_t incr)
   return (void *) prev_heap_end;
 }
 
+
+int _write(int fd, const void *ptr, size_t len) {
+    if (fd == STDOUT_FILENO || fd == STDERR_FILENO) { // stdout=1, stderr=2
+        const char *buf = (const char *)ptr;
+        usart2_send_Hex((uint8_t *)buf, len);
+        // for (size_t i = 0; i < len; i++) {
+        //     usart2_send_Char(buf[i]); // 你的 UART 发送函数
+        // }
+        return len; // 返回写入的字节数
+    }
+    errno = EBADF; // 不支持其他文件描述符
+    return -1;
+}
+
+
+
+int _close(int file) {
+    errno = EBADF;
+    return -1;
+}
+
+off_t _lseek(int file, off_t offset, int whence) {
+    errno = EBADF;
+    return -1;
+}
+
+int _read(int file, char *ptr, int len) {
+    errno = EBADF;
+    return 0;
+}
+
+int _fstat(int file, struct stat *st) {
+    st->st_mode = S_IFCHR; // 假装是字符设备
+    return 0;
+}
+
+int _isatty(int file) {
+    return 1; // 假装是终端
+}
