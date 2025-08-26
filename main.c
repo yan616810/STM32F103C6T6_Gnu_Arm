@@ -61,8 +61,8 @@
 #include "USART.h"
 #include <stdio.h>
 
-// /*IIC 搜索挂载软件IIC上的设备*/
-// #include "iic.h"
+/*IIC 搜索挂载软件IIC上的设备*/
+#include "iic.h"
 
 // /*单色屏幕*/
 // #include "u8g2.h"

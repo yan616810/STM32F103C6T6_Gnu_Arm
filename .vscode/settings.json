@@ -16,7 +16,8 @@
         "lwrb.h": "c",
         "stddef.h": "c",
         "rtc.h": "c",
-        "key.h": "c"
+        "key.h": "c",
+        "iic.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }
