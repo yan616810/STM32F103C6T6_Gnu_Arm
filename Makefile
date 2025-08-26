@@ -124,8 +124,8 @@ ASFLAGS += -ffunction-sections -fdata-sections
 # Linker flags
 # LDFLAGS += -nostartfiles -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections #-nostartfiles 是 GCC 前端选项，不在 binutils/ld 手册中
 LDFLAGS += -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections
-LDFLAGS += -lc 
-# LDFLAGS += -specs=nano.specs # 使用类似微库的newlib-nano库
+# LDFLAGS += -lc 
+LDFLAGS += -specs=nano.specs # 使用类似微库的newlib-nano库
 # LDFLAGS += -lc_nano 你只需要选择 -specs=nano.specs 或 -lc_nano 其中之一即可指明使用的nano库;
 LDFLAGS += $(patsubst %,-L%,$(LIBDIRS)) $(patsubst %,-l%,$(LIBS))
 LDFLAGS += $(MATHLIB)
