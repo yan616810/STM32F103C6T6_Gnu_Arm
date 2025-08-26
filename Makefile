@@ -32,6 +32,8 @@ CSRC =	\
     	$(wildcard SPL/CMSIS/CM3/*.c) \
 		sys_hardware/USART.c \
 		sys_hardware/Delay.c \
+		board_hardware/key.c \
+
 #匹配$(asrc/*.S)文件
 ASRC	=$(wildcard start/*.S)
 CSRCARM	=

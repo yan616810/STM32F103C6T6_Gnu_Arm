@@ -2,8 +2,8 @@
 #include "iic.h"
 #include "string.h"
 /*
-1.Á¬½ÓBMP280Ê±£¬Èç¹ûÁ¬½ÓµÄÊÇÄ£¿é&´ÓÉè±¸µØÖ·ÊÇ0x76£¬SDOµØÖ·Î»¿É²»ÓÃ½ÓµØ(ÆäÄ£¿éÄÚ²¿ÒÑ¾­½ÓµØ)¡£
-2.CSB½Ó3.3VÑ¡ÔñIIC½Ó¿ÚĞ­Òé¡£
+1.è¿æ¥BMP280æ—¶ï¼Œå¦‚æœè¿æ¥çš„æ˜¯æ¨¡å—&ä»è®¾å¤‡åœ°å€æ˜¯0x76ï¼ŒSDOåœ°å€ä½å¯ä¸ç”¨æ¥åœ°(å…¶æ¨¡å—å†…éƒ¨å·²ç»æ¥åœ°)ã€‚
+2.CSBæ¥3.3Vé€‰æ‹©IICæ¥å£åè®®ã€‚
 
 */
 struct bmp280 p_bmp280;
@@ -58,7 +58,7 @@ u8 BMP280_SetWorkMode(WORKING_MODE mode)
 	u8 res=0,v_data_u8=0;
 	if (mode<=0x04) 
 	{
-		v_data_u8=IIC_Read_Byte(BMP280_SlaveAddr,BMP280_CTRLMEAS_REG);//¶ÁÈ¡³ö¿ØÖÆ¼Ä´æÆ÷µÄÖµ
+		v_data_u8=IIC_Read_Byte(BMP280_SlaveAddr,BMP280_CTRLMEAS_REG);//è¯»å–å‡ºæ§åˆ¶å¯„å­˜å™¨çš„å€¼
 		switch(mode)
 		{
 			case BMP280_ULTRA_LOW_POWER_MODE:
@@ -96,15 +96,15 @@ u8 BMP280_SetWorkMode(WORKING_MODE mode)
 u8 BMP280_SetStandbyDurn(BMP280_T_SB standby_durn)
 {
 	u8 v_data_u8=0;
-	v_data_u8=IIC_Read_Byte(BMP280_SlaveAddr,BMP280_CONFIG_REG);                             //¶ÁÈ¡³ö¼Ä´æÆ÷µÄÖµ
-	v_data_u8=((v_data_u8&~0xE0)|((standby_durn<<5)&0xE0));                    //¸ß3Î»
+	v_data_u8=IIC_Read_Byte(BMP280_SlaveAddr,BMP280_CONFIG_REG);                             //è¯»å–å‡ºå¯„å­˜å™¨çš„å€¼
+	v_data_u8=((v_data_u8&~0xE0)|((standby_durn<<5)&0xE0));                    //é«˜3ä½
 	return IIC_Write_Byte(BMP280_SlaveAddr,BMP280_CONFIG_REG,v_data_u8);
 }
 u8 bmp_filter(BMP280_FILTER_COEFFICIENT filter)
 {
 	u8 v_data_u8=0;
 	v_data_u8=IIC_Read_Byte(BMP280_SlaveAddr,BMP280_CONFIG_REG);
-	v_data_u8=((v_data_u8&~0x1C)|((filter<<3)&0x1C)); //´Ë´¦Ó¦Îª<<2
+	v_data_u8=((v_data_u8&~0x1C)|((filter<<3)&0x1C)); //æ­¤å¤„åº”ä¸º<<2
 	return IIC_Write_Byte(BMP280_SlaveAddr,BMP280_CONFIG_REG,v_data_u8);
 }
 u8 BMP280_SetSoftReset(void)
@@ -120,14 +120,14 @@ u8 qingling(void)
 }
 u8 BMP280_Init(void)
 {
-	BMP280_Pins_init();//Òı½ÅÅäÖÃ
+	BMP280_Pins_init();//å¼•è„šé…ç½®
 	if(BMP280_SetSoftReset())
 			return 1; 
 	if(BMP280_Chack())
-		return 2;                                                              //BMP280¼ì²âĞ¾Æ¬
+		return 2;                                                              //BMP280æ£€æµ‹èŠ¯ç‰‡
 	else
 	{
-		                                                         //Èí¼ş¸´Î»Ê¹ÓÃ²»ÁË£¬Ê¹ÓÃÖ®ºóÓÃ²»ÁË
+		                                                         //è½¯ä»¶å¤ä½ä½¿ç”¨ä¸äº†ï¼Œä½¿ç”¨ä¹‹åç”¨ä¸äº†
 		if(BMP280_CalibParam())
 			return 3;
 		if(BMP280_SetSoftReset())
@@ -150,8 +150,8 @@ u8 BMP280_ReadUncompPressureTemperature(s32 *un_press,s32 *un_temp)
 {
 	u8 a_data_u8[6]={0,0,0,0,0,0},res = 0;
 	res=IIC_Read_Len(BMP280_SlaveAddr,BMP280_PRESSURE_MSB_REG,6,a_data_u8);
-	*un_press=(s32)((((u32)(a_data_u8[0]))<<12)|(((u32)(a_data_u8[1]))<<4)|((u32)a_data_u8[2]>>4));/*ÆøÑ¹*/
-	*un_temp=(s32)((((u32)(a_data_u8[3]))<<12)| (((u32)(a_data_u8[4]))<<4)|((u32)a_data_u8[5]>>4));/* ÎÂ¶È */
+	*un_press=(s32)((((u32)(a_data_u8[0]))<<12)|(((u32)(a_data_u8[1]))<<4)|((u32)a_data_u8[2]>>4));/*æ°”å‹*/
+	*un_temp=(s32)((((u32)(a_data_u8[3]))<<12)| (((u32)(a_data_u8[4]))<<4)|((u32)a_data_u8[5]>>4));/* æ¸©åº¦ */
 	return res;
 }
 /*s32 BMP280_CompensateTemperatureInt32(s32 un_temp)
@@ -253,7 +253,7 @@ u8 BMP280_ReadPressureTemperature(u32 *press,s32 *temp)
 	u8 res=0;
 	res=BMP280_ReadUncompPressureTemperature(&un_press,&un_temp);
 	
-	/* ¶ÁÈ¡ÕæÊµµÄÎÂ¶ÈÖµºÍÆøÑ¹Öµ*/
+	/* è¯»å–çœŸå®çš„æ¸©åº¦å€¼å’Œæ°”å‹å€¼*/
 	*temp=BMP280_CompensateTemperatureInt32(un_temp,&p_bmp280);
 	*press=BMP280_CompensatePressureInt32(un_press,&p_bmp280);
 	return res;

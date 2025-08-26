@@ -3,14 +3,14 @@ uint8_t key_value=0;
 
 void key_init()
 {
-	RCC->APB2ENR |= 0X08;//使能GPIOB
+	RCC->APB2ENR |= 0X08;//浣胯兘GPIOB
 	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_IPU;
-	GPIO_InitStruct.GPIO_Pin=GPIO_Pin_13;//按键B13
+	GPIO_InitStruct.GPIO_Pin=GPIO_Pin_13;//鎸夐敭B13
 	GPIO_InitStruct.GPIO_Speed=GPIO_Speed_10MHz;
 	GPIO_Init(GPIOB,&GPIO_InitStruct);
-	GPIO_InitStruct.GPIO_Pin=GPIO_Pin_12;//按键B12
+	GPIO_InitStruct.GPIO_Pin=GPIO_Pin_12;//鎸夐敭B12
 	GPIO_Init(GPIOB,&GPIO_InitStruct);
 }
 
@@ -21,8 +21,8 @@ void get_key()
 	switch(status)
 	{
 		case 0:
-			if((GPIOB->IDR & 0x2000)==0)status=1;//B13按键接GND
-			if((GPIOB->IDR & 0x1000)==0)status=1;//B12按键接GND
+			if((GPIOB->IDR & 0x2000)==0)status=1;//B13鎸夐敭鎺ND
+			if((GPIOB->IDR & 0x1000)==0)status=1;//B12鎸夐敭鎺ND
 			break;
 		case 1:
 			if((GPIOB->IDR & 0X2000)==0){mid=1;status=2;}

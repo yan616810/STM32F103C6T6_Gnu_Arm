@@ -49,7 +49,7 @@
 #include "Delay.h"
 
 /*自写按键*/
-// #include "key.h"
+#include "key.h"
 
 /*内部备份RAM + 引脚侵入检测*/
 // #include "BKP.h"
@@ -98,7 +98,7 @@
 // #define dmp_get_fifo  10//10ms读一次mpu6050 fifo
 
 // volatile uint16_t second_cnt=1000;
-// volatile uint8_t key_cnt=10,key_task_cnt=10;
+volatile uint8_t key_cnt=10;
 // volatile uint8_t ms_cnt=100;
 // volatile uint8_t ms_25_cnt=dmp_get_fifo;
 
@@ -159,113 +159,122 @@
 // 	TIM_Cmd(TIM1,ENABLE);
 // }
 
-// void timer2_init(void)
-// {
-// 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
+void timer2_init(void)
+{
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
 	
-// 	TIM_InternalClockConfig(TIM2);
+	TIM_InternalClockConfig(TIM2);
 	
-// 	{
-// 		TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
+	{
+		TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 		
-// 		TIM_TimeBaseStructInit(&TIM_TimeBaseInitStruct);
+		TIM_TimeBaseStructInit(&TIM_TimeBaseInitStruct);
 		
-// 		TIM_TimeBaseInitStruct.TIM_ClockDivision=TIM_CKD_DIV1;
-// 		TIM_TimeBaseInitStruct.TIM_CounterMode=TIM_CounterMode_Up;
-// 		TIM_TimeBaseInitStruct.TIM_Period=1000-1;
-// 		TIM_TimeBaseInitStruct.TIM_Prescaler=72-1;
-// 		TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitStruct);
-// 	}
+		TIM_TimeBaseInitStruct.TIM_ClockDivision=TIM_CKD_DIV1;
+		TIM_TimeBaseInitStruct.TIM_CounterMode=TIM_CounterMode_Up;
+		TIM_TimeBaseInitStruct.TIM_Period=1000-1;
+		TIM_TimeBaseInitStruct.TIM_Prescaler=72-1;
+		TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitStruct);
+	}
 	
-// 	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
 	
-// 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-// 	{
-// 		NVIC_InitTypeDef NVIC_InitStruct;
-// 		NVIC_InitStruct.NVIC_IRQChannel=TIM2_IRQn;
-// 		NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
-// 		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=15;//最低优先级
-// 		NVIC_InitStruct.NVIC_IRQChannelSubPriority=0;
-// 		NVIC_Init(&NVIC_InitStruct);
-// 	}
-// 	TIM_Cmd(TIM2,ENABLE);
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	{
+		NVIC_InitTypeDef NVIC_InitStruct;
+		NVIC_InitStruct.NVIC_IRQChannel=TIM2_IRQn;
+		NVIC_InitStruct.NVIC_IRQChannelCmd=ENABLE;
+		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority=15;//最低优先级
+		NVIC_InitStruct.NVIC_IRQChannelSubPriority=0;
+		NVIC_Init(&NVIC_InitStruct);
+	}
+	TIM_Cmd(TIM2,ENABLE);
 	
-// }
+}
 
-// void TIM2_IRQHandler(void)//1ms
-// {
-// 	if(TIM_GetITStatus(TIM2,TIM_IT_Update) == SET)
-// 	{
-// 		if(second_cnt<1000)second_cnt++;
-// 		if(ms_cnt<100)ms_cnt++;
-// 		if(key_cnt<10)key_cnt++;
-// 		if(ms_25_cnt<dmp_get_fifo)ms_25_cnt++;
-// 		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
-// 	}
-// }
-// /**
-//  * @brief 按键处理任务
-//  * 
-//  */
-// void key_task()
-// {
-// 	if(key_value=='L')//长按B13清屏
-// 	{
-// 		key_value=0;
-// 	}
-// 	else if (key_value==1)//B13
-// 	{
-// 		key_value=0;
-// 	//自己写的软件SPI驱动W2Q128
-// 		// memset(flash_buf,0x00,sizeof(flash_buf));
-// 		// W25Q128_ReadData(0x001100,flash_buf,256);//读第一块的第二扇区的第二页
-// 		// usart2_send_Hex(flash_buf,256);
-// 		// //Sector erase
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,0*7,4*10,"Sector erase ing···");
-// 		// u8g2_SendBuffer(&u8g2);
-// 		// if(W25Q128_SectorErase(0x001100)==0)
-// 		// {
-// 		// 	printf("Sector erase %s!\r\n","ok");
-// 		// 	u8g2_SetDrawColor(&u8g2,0);
-// 		// 	u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
-// 		// 	u8g2_SetDrawColor(&u8g2,1);
-// 		// 	u8g2_DrawStr(&u8g2,0*7,4*10,"Sector Erase Finish!");
-// 		// }
-// 		// else{
-// 		// 	printf("Sector erase %s!\r\n","error");
-// 		// 	u8g2_SetDrawColor(&u8g2,0);
-// 		// 	u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
-// 		// 	u8g2_SetDrawColor(&u8g2,1);
-// 		// 	u8g2_DrawStr(&u8g2,0*7,4*10,"Sector Erase fail!");
-// 		// }
-// 		// u8g2_SendBuffer(&u8g2);
+void TIM2_IRQHandler(void)//1ms
+{
+	if(TIM_GetITStatus(TIM2,TIM_IT_Update) == SET)
+	{
+		// if(second_cnt<1000)second_cnt++;
+		// if(ms_cnt<100)ms_cnt++;
+		if(key_cnt<10)key_cnt++;
+		// if(ms_25_cnt<dmp_get_fifo)ms_25_cnt++;
+		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
+	}
+}
+/**
+ * @brief 按键处理任务
+ * 
+ */
+void key_task()
+{
+	if(key_value=='L')//长按B13
+	{
+		key_value=0;
+		GPIOC->ODR ^= GPIO_Pin_13;
+		Delay_ms(500);
+		GPIOC->ODR ^= GPIO_Pin_13;
+	}
+	else if(key_value=='D')//双击B13
+	{
+		key_value=0;
+	//pc13 led
+		GPIOC->ODR ^= GPIO_Pin_13;
+	}
+	else if (key_value==1)//单击B13
+	{
+		key_value=0;
+	//自己写的软件SPI驱动W2Q128
+		// memset(flash_buf,0x00,sizeof(flash_buf));
+		// W25Q128_ReadData(0x001100,flash_buf,256);//读第一块的第二扇区的第二页
+		// usart2_send_Hex(flash_buf,256);
+		// //Sector erase
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,0*7,4*10,"Sector erase ing···");
+		// u8g2_SendBuffer(&u8g2);
+		// if(W25Q128_SectorErase(0x001100)==0)
+		// {
+		// 	printf("Sector erase %s!\r\n","ok");
+		// 	u8g2_SetDrawColor(&u8g2,0);
+		// 	u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
+		// 	u8g2_SetDrawColor(&u8g2,1);
+		// 	u8g2_DrawStr(&u8g2,0*7,4*10,"Sector Erase Finish!");
+		// }
+		// else{
+		// 	printf("Sector erase %s!\r\n","error");
+		// 	u8g2_SetDrawColor(&u8g2,0);
+		// 	u8g2_DrawBox(&u8g2,0*7,4*10,128,10);
+		// 	u8g2_SetDrawColor(&u8g2,1);
+		// 	u8g2_DrawStr(&u8g2,0*7,4*10,"Sector Erase fail!");
+		// }
+		// u8g2_SendBuffer(&u8g2);
 
-// 		// memset(flash_buf,0x00,sizeof(flash_buf));
-// 		// W25Q128_ReadData(0x001100,flash_buf,256);//读第一块的第二扇区的第二页
-// 		// usart2_send_Hex(flash_buf,256);
-// 	//ringbuff 写
-// 		// static uint8_t data='b';
-// 		// rb_write(&rb_1,data++);
-// 	//2025/6/25 gps earth QGIS
-// 		earth_flag=(earth_flag==0)?1:0;
-// 		if(earth_flag == 1)
-// 		{
-// 			u8g2_oled_draw_earth(&u8g2);
-// 			u8g2_SendBuffer(&u8g2);
-// 		}
-// 	}
-// 	else if (key_value==2)//B12
-// 	{
-// 		key_value=0;
-// 	//ringbuff 读
-// 		// uint8_t data='A';
-// 		// rb_read(&rb_1,&data);
-// 		// printf("%c\r\n",data);
-// 	}
-// }
+		// memset(flash_buf,0x00,sizeof(flash_buf));
+		// W25Q128_ReadData(0x001100,flash_buf,256);//读第一块的第二扇区的第二页
+		// usart2_send_Hex(flash_buf,256);
+	//ringbuff 写
+		// static uint8_t data='b';
+		// rb_write(&rb_1,data++);
+	//2025/6/25 gps earth QGIS
+		// earth_flag=(earth_flag==0)?1:0;
+		// if(earth_flag == 1)
+		// {
+		// 	u8g2_oled_draw_earth(&u8g2);
+		// 	u8g2_SendBuffer(&u8g2);
+		// }
+	}
+	else if (key_value==2)//单击B12
+	{
+		key_value=0;
+	//ringbuff 读
+		// uint8_t data='A';
+		// rb_read(&rb_1,&data);
+		// printf("%c\r\n",data);
+	}
+}
 
 // void gps_task(void)
 // {
@@ -279,220 +288,228 @@
 //     }
 // }
 
-// void task_proc(void)
-// {
-// 	/*LWGPS解析DMA.c接收到缓冲区中的数据*/
-// 	gps_task();
+void task_proc(void)
+{
+	// /*LWGPS解析DMA.c接收到缓冲区中的数据*/
+	// gps_task();
 
-// 	if(second_cnt == 1000)//1s
-// 	{
-// 		second_cnt=0;
-// 		if (lwgps_handle.is_valid) 
-// 		{
-// 			if(earth_flag == 0)//earth_flag==1时代表以全球缩略图的形式显示实时坐标
-// 			{
-// 				// printf("[--YLAD--]\r\n");
+	// if(second_cnt == 1000)//1s
+	// {
+	// 	second_cnt=0;
+	// 	if (lwgps_handle.is_valid) 
+	// 	{
+	// 		if(earth_flag == 0)//earth_flag==1时代表以全球缩略图的形式显示实时坐标
+	// 		{
+	// 			// printf("[--YLAD--]\r\n");
 
-// 				// 可选：解析结果输出
-//     			// if (lwgps_handle.is_valid) {
-//     			    // printf("Lat: %.6f, Lon: %.6f, Alt: %.4f\r\n",
-//     			    //     latitude, longitude, altitude);
-//     			// }
-// 					u8g2_ClearBuffer(&u8g2);
-// 				memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 				sprintf(u8g2_buf,"[>Lat:%03.7f<]",lwgps_handle.latitude);
-// 				u8g2_SetDrawColor(&u8g2,0);
-// 				u8g2_DrawBox(&u8g2,0*7,2*10,18*7,10);
-// 				u8g2_SetDrawColor(&u8g2,1);
-// 				u8g2_DrawStr(&u8g2,0*7,2*10,u8g2_buf);
+	// 			// 可选：解析结果输出
+    // 			// if (lwgps_handle.is_valid) {
+    // 			    // printf("Lat: %.6f, Lon: %.6f, Alt: %.4f\r\n",
+    // 			    //     latitude, longitude, altitude);
+    // 			// }
+	// 				u8g2_ClearBuffer(&u8g2);
+	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
+	// 			sprintf(u8g2_buf,"[>Lat:%03.7f<]",lwgps_handle.latitude);
+	// 			u8g2_SetDrawColor(&u8g2,0);
+	// 			u8g2_DrawBox(&u8g2,0*7,2*10,18*7,10);
+	// 			u8g2_SetDrawColor(&u8g2,1);
+	// 			u8g2_DrawStr(&u8g2,0*7,2*10,u8g2_buf);
 
-// 				memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 				sprintf(u8g2_buf,"[>Lon:%03.7f<]",lwgps_handle.longitude);
-// 				u8g2_SetDrawColor(&u8g2,0);
-// 				u8g2_DrawBox(&u8g2,0*7,3*10,18*7,10);
-// 				u8g2_SetDrawColor(&u8g2,1);
-// 				u8g2_DrawStr(&u8g2,0*7,3*10,u8g2_buf);
+	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
+	// 			sprintf(u8g2_buf,"[>Lon:%03.7f<]",lwgps_handle.longitude);
+	// 			u8g2_SetDrawColor(&u8g2,0);
+	// 			u8g2_DrawBox(&u8g2,0*7,3*10,18*7,10);
+	// 			u8g2_SetDrawColor(&u8g2,1);
+	// 			u8g2_DrawStr(&u8g2,0*7,3*10,u8g2_buf);
 
-// 				memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 				sprintf(u8g2_buf,"[>Alt:%03.5f<]", lwgps_handle.altitude);
-// 				u8g2_SetDrawColor(&u8g2,0);
-// 				u8g2_DrawBox(&u8g2,0*7,4*10,18*7,10);
-// 				u8g2_SetDrawColor(&u8g2,1);
-// 				u8g2_DrawStr(&u8g2,0*7,4*10,u8g2_buf);
+	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
+	// 			sprintf(u8g2_buf,"[>Alt:%03.5f<]", lwgps_handle.altitude);
+	// 			u8g2_SetDrawColor(&u8g2,0);
+	// 			u8g2_DrawBox(&u8g2,0*7,4*10,18*7,10);
+	// 			u8g2_SetDrawColor(&u8g2,1);
+	// 			u8g2_DrawStr(&u8g2,0*7,4*10,u8g2_buf);
 
-// 				u8g2_SendBuffer(&u8g2);
-// 			}
-// 			else{
-// 				//全球缩略图
-// 				u8g2_ClearBuffer(&u8g2);
-// 				u8g2_oled_draw_earth(&u8g2);//在全幅缓冲区内绘制全球缩略图
-// 				u8g2_oled_draw_earth_pixel_VHxvLine(&u8g2,lwgps_handle.latitude,lwgps_handle.longitude);//在全球缩略图上绘制实时经纬度坐标点
-// 				u8g2_SendBuffer(&u8g2);
-// 			}
+	// 			u8g2_SendBuffer(&u8g2);
+	// 		}
+	// 		else{
+	// 			//全球缩略图
+	// 			u8g2_ClearBuffer(&u8g2);
+	// 			u8g2_oled_draw_earth(&u8g2);//在全幅缓冲区内绘制全球缩略图
+	// 			u8g2_oled_draw_earth_pixel_VHxvLine(&u8g2,lwgps_handle.latitude,lwgps_handle.longitude);//在全球缩略图上绘制实时经纬度坐标点
+	// 			u8g2_SendBuffer(&u8g2);
+	// 		}
 				
-// 		}
-// 		else
-// 		{
-// 			// u8g2_ClearBuffer(&u8g2);
-// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 			sprintf(u8g2_buf,"[>GPS No Data<]");
-// 			u8g2_SetDrawColor(&u8g2,1);
-// 			u8g2_DrawBox(&u8g2,3*7,27,13*7,15);
-// 			u8g2_SetDrawColor(&u8g2,0);
-// 			u8g2_DrawStr(&u8g2,3*7,3*10,u8g2_buf);
-// 			u8g2_SendBuffer(&u8g2);
-// 		}
-// 	}
-// 	if(key_cnt==10)//10ms
-// 	{
-// 		key_cnt=0;
-// 		get_key();
-// 		key_task_cnt++;//每200ms处理一下按键任务
-// 		if(key_task_cnt==20)
-// 		{
-// 			key_task_cnt=0;
-// 			key_task();
-// 		}
-// 	}
-// 	if(ms_cnt==100)//100ms
-// 	{
-// 		ms_cnt=0;
-// //mpu6050
-// 		// // 将上一次画布缓冲区角速度旧值区域填充空Box
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,2*7,0*10,6*7,10);
-// 		// u8g2_DrawBox(&u8g2,2*7,1*10,6*7,10);
-// 		// u8g2_DrawBox(&u8g2,2*7,2*10,6*7,10);
-// 		// // 在缓冲区空Box处写入角速度数据
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
-// 		// sprintf(u8g2_buf,"%+6d",gx);
-// 		// u8g2_DrawStr(&u8g2,2*7,0*10,u8g2_buf);
-// 		// memset(u8g2_buf,0,sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%+6d",gy);
-// 		// u8g2_DrawStr(&u8g2,2*7,1*10,u8g2_buf);
-// 		// memset(u8g2_buf,0,sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%+6d",gz);
-// 		// u8g2_DrawStr(&u8g2,2*7,2*10,u8g2_buf);
-// 		// // 将上一次画布缓冲区重力加速度旧值区域填充空Box
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,11*7,0*10,6*7,10);
-// 		// u8g2_DrawBox(&u8g2,11*7,1*10,6*7,10);
-// 		// u8g2_DrawBox(&u8g2,11*7,2*10,6*7,10);
-// 		// // 在缓冲区空Box处写入重力加速度数据
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
-// 		// sprintf(u8g2_buf,"%+6d",ax);
-// 		// u8g2_DrawStr(&u8g2,11*7,0*10,u8g2_buf);
-// 		// memset(u8g2_buf,0,sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%+6d",ay);
-// 		// u8g2_DrawStr(&u8g2,11*7,1*10,u8g2_buf);
-// 		// memset(u8g2_buf,0,sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%+6d",az);
-// 		// u8g2_DrawStr(&u8g2,11*7,2*10,u8g2_buf);
-// //RTC
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%4d",RTC_read_RTCStruct.UTCxTime.tm_year);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,0*10,4*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,0*10,u8g2_buf);
+	// 	}
+	// 	else
+	// 	{
+	// 		// u8g2_ClearBuffer(&u8g2);
+	// 		memset(u8g2_buf, 0, sizeof(u8g2_buf));
+	// 		sprintf(u8g2_buf,"[>GPS No Data<]");
+	// 		u8g2_SetDrawColor(&u8g2,1);
+	// 		u8g2_DrawBox(&u8g2,3*7,27,13*7,15);
+	// 		u8g2_SetDrawColor(&u8g2,0);
+	// 		u8g2_DrawStr(&u8g2,3*7,3*10,u8g2_buf);
+	// 		u8g2_SendBuffer(&u8g2);
+	// 	}
+	// }
+	if(key_cnt==10)//10ms
+	{
+		key_cnt=0;
+		get_key();
+		if(key_value != 0)
+		{
+			key_task();
+		}
+	}
+	// if(ms_cnt==100)//100ms
+	// {
+	// 	ms_cnt=0;
+//mpu6050
+		// // 将上一次画布缓冲区角速度旧值区域填充空Box
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,2*7,0*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,2*7,1*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,2*7,2*10,6*7,10);
+		// // 在缓冲区空Box处写入角速度数据
+		// u8g2_SetDrawColor(&u8g2,1);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
+		// sprintf(u8g2_buf,"%+6d",gx);
+		// u8g2_DrawStr(&u8g2,2*7,0*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",gy);
+		// u8g2_DrawStr(&u8g2,2*7,1*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",gz);
+		// u8g2_DrawStr(&u8g2,2*7,2*10,u8g2_buf);
+		// // 将上一次画布缓冲区重力加速度旧值区域填充空Box
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,11*7,0*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,11*7,1*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,11*7,2*10,6*7,10);
+		// // 在缓冲区空Box处写入重力加速度数据
+		// u8g2_SetDrawColor(&u8g2,1);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
+		// sprintf(u8g2_buf,"%+6d",ax);
+		// u8g2_DrawStr(&u8g2,11*7,0*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",ay);
+		// u8g2_DrawStr(&u8g2,11*7,1*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",az);
+		// u8g2_DrawStr(&u8g2,11*7,2*10,u8g2_buf);
+//RTC
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%4d",RTC_read_RTCStruct.UTCxTime.tm_year);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,0*10,4*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,0*10,u8g2_buf);
 
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%2d",RTC_read_RTCStruct.UTCxTime.tm_mon);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,1*10,2*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,1*10,u8g2_buf);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%2d",RTC_read_RTCStruct.UTCxTime.tm_mon);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,1*10,2*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,1*10,u8g2_buf);
 
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%2d",RTC_read_RTCStruct.UTCxTime.tm_mday);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,2*10,2*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,2*10,u8g2_buf);		
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%2d",RTC_read_RTCStruct.UTCxTime.tm_mday);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,2*10,2*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,2*10,u8g2_buf);		
 
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_hour);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,3*10,2*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,3*10,u8g2_buf);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_hour);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,3*10,2*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,3*10,u8g2_buf);
 
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_min);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,4*10,2*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,4*10,u8g2_buf);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_min);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,4*10,2*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,4*10,u8g2_buf);
 
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_sec);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,5*7,5*10,2*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,5*7,5*10,u8g2_buf);
-// 		// //时间戳
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%10lu",RTC_read_Timestamp());
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,8*7,5*10,10*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,8*7,5*10,u8g2_buf);
-// //编码器值
-// 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
-// 		// sprintf(u8g2_buf,"%+06d",encoder_value);
-// 		// u8g2_SetDrawColor(&u8g2,0);
-// 		// u8g2_DrawBox(&u8g2,8*7,4*10,6*7,10);
-// 		// u8g2_SetDrawColor(&u8g2,1);
-// 		// u8g2_DrawStr(&u8g2,8*7,4*10,u8g2_buf);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%02d",RTC_read_RTCStruct.UTCxTime.tm_sec);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,5*10,2*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,5*7,5*10,u8g2_buf);
+		// //时间戳
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%10lu",RTC_read_Timestamp());
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,8*7,5*10,10*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,8*7,5*10,u8g2_buf);
+//编码器值
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+06d",encoder_value);
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,8*7,4*10,6*7,10);
+		// u8g2_SetDrawColor(&u8g2,1);
+		// u8g2_DrawStr(&u8g2,8*7,4*10,u8g2_buf);
 
-// 		// u8g2_SendBuffer(&u8g2);
-// 	}
-// 	if(ms_25_cnt==dmp_get_fifo)
-// 	{
-// 		ms_25_cnt=0;
-// 	//MPU6050中DMP数据
-// 		// if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
-//     	// // else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
-// 		// else{
-// 		// 	roll_temp = roll*100;
-// 		// 	pitch_temp = pitch*100;
-// 		// 	yaw_temp = yaw*100;
-// 		// 	sumcheck = 0; 
-// 		// 	addcheck = 0; 
-// 		// 	niming[4]=(uint8_t)(roll_temp);
-// 		// 	niming[5]=(uint8_t)(roll_temp>>8);
-// 		// 	niming[6]=(uint8_t)(pitch_temp);
-// 		// 	niming[7]=(uint8_t)(pitch_temp>>8);
-// 		// 	niming[8]=(uint8_t)(yaw_temp);
-// 		// 	niming[9]=(uint8_t)(yaw_temp>>8);
-// 		// 	niming[10]=0x01;
-// 		// 	for(uint8_t i=0; i < (niming[3]+4); i++) 
-// 		// 	{ 
-// 		// 		sumcheck += niming[i];
-// 		// 		addcheck += sumcheck;  
-// 		// 	}
-// 		// 	niming[11]=sumcheck;
-// 		// 	niming[12]=addcheck;
-// 		// 	for(uint8_t i=0;i<13;i++)
-// 		// 	{
-// 		// 		usart2_send_Char(niming[i]);
-// 		// 	}
-// 		// }
-// 	//RTC实时时钟
-// 		// RTC_get_DataStruct(&RTC_read_RTCStruct,&RTC_Init_And_Adjustment);
-// 	//编码器
-// 		// encoder_value = Encoder_get_value();
-// 	}
-// }
+		// u8g2_SendBuffer(&u8g2);
+	// }
+	// if(ms_25_cnt==dmp_get_fifo)
+	// {
+	// 	ms_25_cnt=0;
+	//MPU6050中DMP数据
+		// if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
+    	// // else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
+		// else{
+		// 	roll_temp = roll*100;
+		// 	pitch_temp = pitch*100;
+		// 	yaw_temp = yaw*100;
+		// 	sumcheck = 0; 
+		// 	addcheck = 0; 
+		// 	niming[4]=(uint8_t)(roll_temp);
+		// 	niming[5]=(uint8_t)(roll_temp>>8);
+		// 	niming[6]=(uint8_t)(pitch_temp);
+		// 	niming[7]=(uint8_t)(pitch_temp>>8);
+		// 	niming[8]=(uint8_t)(yaw_temp);
+		// 	niming[9]=(uint8_t)(yaw_temp>>8);
+		// 	niming[10]=0x01;
+		// 	for(uint8_t i=0; i < (niming[3]+4); i++) 
+		// 	{ 
+		// 		sumcheck += niming[i];
+		// 		addcheck += sumcheck;  
+		// 	}
+		// 	niming[11]=sumcheck;
+		// 	niming[12]=addcheck;
+		// 	for(uint8_t i=0;i<13;i++)
+		// 	{
+		// 		usart2_send_Char(niming[i]);
+		// 	}
+		// }
+	//RTC实时时钟
+		// RTC_get_DataStruct(&RTC_read_RTCStruct,&RTC_Init_And_Adjustment);
+	//编码器
+		// encoder_value = Encoder_get_value();
+	// }
+}
 
 int main(void)
 {
+//配置PC13-led
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	{
+	    GPIO_InitTypeDef GPIO_InitStructure;
+	    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_13;
+	    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+	    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	    GPIO_Init(GPIOC, &GPIO_InitStructure);
+	}
+	GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);//点亮LED
 /*编码器*/
 	// Encoder_init();
 /*按键初始化*/
-	// key_init();
+	key_init();
 /*串口初始化*/
 	usart2_init();
 /*IIC协议端口初始化 && 以极低的协议速度搜索iic设备并通过串口打印地址信息*/
@@ -684,11 +701,11 @@ int main(void)
 	// usart2_send_Hex(data,len);
 	// printf("\r\n");
 /*任务滴答*/
-	// timer2_init();
+	timer2_init();
 	printf("system init success!!!\r\n");
-	while(1)
+	for(;;)
 	{
-		// task_proc();
+		task_proc();
 		rx_data_proc();
 	}
 }

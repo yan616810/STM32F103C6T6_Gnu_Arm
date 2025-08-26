@@ -9,7 +9,7 @@
 #include "dmpmap.h"
 #include "Delay.h"
 
-//定义目标板采用MSP430
+//瀹氫箟鐩爣鏉块噰鐢∕SP430
 #define  MOTION_DRIVER_TARGET_stm32f103
 
 /* The following functions must be defined for this platform:

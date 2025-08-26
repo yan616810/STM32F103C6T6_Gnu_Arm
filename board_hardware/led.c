@@ -10,10 +10,10 @@ void led_pin_init(void)
 		GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
 		GPIO_Init(GPIOC,&GPIO_InitStruct);
 	}
-	GPIO_WriteBit(GPIOC,GPIO_Pin_13,Bit_SET);//Ãð
+	GPIO_WriteBit(GPIOC,GPIO_Pin_13,Bit_SET);//ÃƒÃ°
 }
 
-void led_Reversal(void)//led·´×ª
+void led_Reversal(void)//ledÂ·Â´Ã—Âª
 {
 	/*RCC->APB2ENR=0x00000010;
 	GPIOC->CRH=0x00300000;

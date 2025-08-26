@@ -1,14 +1,14 @@
 #include "stm32f10x.h"                  // Device header
 #include "smg.h"
 
-volatile unsigned char smg_buff[3]={0x3f,0x3f,0x3f};//ÏÔ´æ£»volatileÎŞÊÓ±àÒëÆ÷ÓÅ»¯£¬¿ÉÖ±½Ó·ÃÎÊÏÔ´æµØÖ·ÖĞµÄÊı¾İ£¬ÊÇÎªÁË·ÀÖ¹ÔÚÖĞ¶ÏÖĞĞŞ¸ÄÏÔ´æÊ±£¬±àÒëÆ÷»áÓÅ»¯·ÃÎÊÏÔ´æ³ÌĞò£»
+volatile unsigned char smg_buff[3]={0x3f,0x3f,0x3f};//æ˜¾å­˜ï¼›volatileæ— è§†ç¼–è¯‘å™¨ä¼˜åŒ–ï¼Œå¯ç›´æ¥è®¿é—®æ˜¾å­˜åœ°å€ä¸­çš„æ•°æ®ï¼Œæ˜¯ä¸ºäº†é˜²æ­¢åœ¨ä¸­æ–­ä¸­ä¿®æ”¹æ˜¾å­˜æ—¶ï¼Œç¼–è¯‘å™¨ä¼šä¼˜åŒ–è®¿é—®æ˜¾å­˜ç¨‹åºï¼›
 
-//²»¹æÔò¶Ë¿ÚÇı¶¯ÊıÂë¹Ü
-#define smg_PA6(x) GPIO_WriteBit(GPIOA,GPIO_Pin_6,(BitAction)x)//Î»¶¨Òå£¬¹²Òõ¼«¹«¹²¶Ë
+//ä¸è§„åˆ™ç«¯å£é©±åŠ¨æ•°ç ç®¡
+#define smg_PA6(x) GPIO_WriteBit(GPIOA,GPIO_Pin_6,(BitAction)x)//ä½å®šä¹‰ï¼Œå…±é˜´æå…¬å…±ç«¯
 #define smg_PA5(x) GPIO_WriteBit(GPIOA,GPIO_Pin_5,(BitAction)x)
 #define smg_PA4(x) GPIO_WriteBit(GPIOA,GPIO_Pin_4,(BitAction)x)
 																									
-#define smg_PA0(x) GPIO_WriteBit(GPIOA,GPIO_Pin_0,(BitAction)x)//¶Î
+#define smg_PA0(x) GPIO_WriteBit(GPIOA,GPIO_Pin_0,(BitAction)x)//æ®µ
 //#define smg_PB11(x) GPIO_WriteBit(GPIOB,GPIO_Pin_11,(BitAction)x)
 #define smg_PA1(x) GPIO_WriteBit(GPIOA,GPIO_Pin_1,(BitAction)x)
 #define smg_PA2(x) GPIO_WriteBit(GPIOA,GPIO_Pin_2,(BitAction)x)
@@ -17,7 +17,7 @@ volatile unsigned char smg_buff[3]={0x3f,0x3f,0x3f};//ÏÔ´æ£»volatileÎŞÊÓ±àÒëÆ÷ÓÅ
 #define smg_PB0(x) GPIO_WriteBit(GPIOB,GPIO_Pin_0,(BitAction)x)
 #define smg_PB1(x) GPIO_WriteBit(GPIOB,GPIO_Pin_1,(BitAction)x)
 #define smg_PB10(x) GPIO_WriteBit(GPIOB,GPIO_Pin_10,(BitAction)x)
-const unsigned char smg_code[]=//Òõ¼«
+const unsigned char smg_code[]=//é˜´æ
 {
 	0x3f,//0
 	0x06,//1
@@ -44,7 +44,7 @@ const unsigned char smg_code[]=//Òõ¼«
 	0x40,//-
 	0x80,//.
 	0xff,//8.
-	0x00,//Ãğ
+	0x00,//ç­
 };
 
 void smg_init()
@@ -74,7 +74,7 @@ void smg_init()
 static void date_port(unsigned char date)
 {
 	uint8_t num=0x01;
-	smg_PA0((((date&num)==0)?Bit_RESET:Bit_SET));num<<=1; //ÏÔÊ¾¼¸¸öÖĞ¶ÏÊ±¼äºó¹Ø±Õ¸ÃÎ»
+	smg_PA0((((date&num)==0)?Bit_RESET:Bit_SET));num<<=1; //æ˜¾ç¤ºå‡ ä¸ªä¸­æ–­æ—¶é—´åå…³é—­è¯¥ä½
 	//smg_PB11((((date&num)==0)?Bit_RESET:Bit_SET));num<<=1;
 	smg_PA1((((date&num)==0)?Bit_RESET:Bit_SET));num<<=1;
 	smg_PA2((((date&num)==0)?Bit_RESET:Bit_SET));num<<=1;
@@ -93,21 +93,21 @@ void smg_scanf(void)
 	{
 		case 0:
 		{
-			smg_PA4(1);//¹ØÉÏÒ»Î»
+			smg_PA4(1);//å…³ä¸Šä¸€ä½
 			date_port(*smg_buff);
-			smg_PA6(0);//¿ªÏÂÒ»Î»
+			smg_PA6(0);//å¼€ä¸‹ä¸€ä½
 		}break;
 		case 1:
 		{
-			smg_PA6(1);//¹ØÉÏÒ»Î»
+			smg_PA6(1);//å…³ä¸Šä¸€ä½
 			date_port(*(smg_buff+1));
-			smg_PA5(0);//¿ªÏÂÒ»Î»
+			smg_PA5(0);//å¼€ä¸‹ä¸€ä½
 		}break;
 		case 2:
 		{
-			smg_PA5(1);//¹ØÉÏÒ»Î»
+			smg_PA5(1);//å…³ä¸Šä¸€ä½
 			date_port(*(smg_buff+2));
-			smg_PA4(0);//¿ªÏÂÒ»Î»
+			smg_PA4(0);//å¼€ä¸‹ä¸€ä½
 		}break;
 		default:break;
 	}
@@ -122,21 +122,21 @@ void smg_scanf(void)
 //	{
 //		case 0:
 //		{
-//			smg_PA4(1);//¹ØÉÏÒ»Î»
+//			smg_PA4(1);//å…³ä¸Šä¸€ä½
 //			date_port(*smg_date);
-//			smg_PA6(0);//¿ªÏÂÒ»Î»
+//			smg_PA6(0);//å¼€ä¸‹ä¸€ä½
 //		}break;
 //		case 1:
 //		{
-//			smg_PA6(1);//¹ØÉÏÒ»Î»
+//			smg_PA6(1);//å…³ä¸Šä¸€ä½
 //			date_port(*(smg_date+1));
-//			smg_PA5(0);//¿ªÏÂÒ»Î»
+//			smg_PA5(0);//å¼€ä¸‹ä¸€ä½
 //		}break;
 //		case 2:
 //		{
-//			smg_PA5(1);//¹ØÉÏÒ»Î»
+//			smg_PA5(1);//å…³ä¸Šä¸€ä½
 //			date_port(*(smg_date+2));
-//			smg_PA4(0);//¿ªÏÂÒ»Î»
+//			smg_PA4(0);//å¼€ä¸‹ä¸€ä½
 //		}break;
 //		default:break;
 //	}

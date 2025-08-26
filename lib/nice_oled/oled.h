@@ -7,13 +7,13 @@
 
 
 
-#define OLED_DATA 1	//Ğ´Êı¾İ
+#define OLED_DATA 1	//å†™æ•°æ®
 
-void OLED_WR_Byte(u8 dat,u8 mode);  //·¢ËÍÒ»¸ö×Ö½Ú
-void OLED_ColorTurn(u8 i);          //·´×ªÑÕÉ«
-void OLED_DisplayTurn(u8 i);        //ÆÁÄ»Ğı×ª180¡ã
-void OLED_DisPlay_On(void);         //¿ªÆôoledÏÔÊ¾ÆÁ
-void OLED_DisPlay_Off(void);        //¹Ø±ÕoledÏÔÊ¾ÆÁ
+void OLED_WR_Byte(u8 dat,u8 mode);  //å‘é€ä¸€ä¸ªå­—èŠ‚
+void OLED_ColorTurn(u8 i);          //åè½¬é¢œè‰²
+void OLED_DisplayTurn(u8 i);        //å±å¹•æ—‹è½¬180Â°
+void OLED_DisPlay_On(void);         //å¼€å¯oledæ˜¾ç¤ºå±
+void OLED_DisPlay_Off(void);        //å…³é—­oledæ˜¾ç¤ºå±
 void OLED_Refresh(void);
 void OLED_Clear(void);
 void OLED_DrawPoint(u8 x,u8 y,u8 t);

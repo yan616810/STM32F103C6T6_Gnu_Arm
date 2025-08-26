@@ -4,7 +4,7 @@
 
 
 /****************
-×¢Òâ£ºÄ£ÄâIICÊ±£¬ÈÎÒâIO¿Ú£¨³ýJTAG¿ÚÍâ£¬¶¼¿ÉÒÔ×öSDAºÍSCL£©
+æ³¨æ„ï¼šæ¨¡æ‹ŸIICæ—¶ï¼Œä»»æ„IOå£ï¼ˆé™¤JTAGå£å¤–ï¼Œéƒ½å¯ä»¥åšSDAå’ŒSCLï¼‰
 ****************/
 #define OLED_SCL_Clr() GPIO_ResetBits(GPIOA,GPIO_Pin_1)//SCL
 #define OLED_SCL_Set() GPIO_SetBits(GPIOA,GPIO_Pin_1)

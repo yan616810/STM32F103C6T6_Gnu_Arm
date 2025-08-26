@@ -43,8 +43,8 @@
 #define BMP280_TEMPERATURE_LSB_REG           0xFB                              /*Temperature LSB Reg */  
 #define BMP280_TEMPERATURE_XLSB_REG          0xFC                              /*Temperature XLSB Reg */  
   
-/* ÔÚforeced modeÏÂ£¬1sµÄ²ÉÑùÖÜÆÚ£¬ÎÂ¶ÈºÍÆøÑ¹Ê¹ÓÃ×îµÍµÄ¾«¶È²É¼¯²¢ÇÒÊ¹ÓÃ×îĞ¡µÄÂË²¨Æ÷ÏµÊı,Êı¾İµÄ²É¼¯Ê±¼ä´ó¸ÅÔÚ6ms,Æ½¾ù¹¦ÂÊÎª3.27uA¡£*/  
-/* ÔÚforeced modeÏÂ£¬1sµÄ²ÉÑùÖÜÆÚ, ÎÂ¶ÈºÍÆøÑ¹Ê¹ÓÃ×î¸ßµÄ¾«¶È²É¼¯²¢ÇÒÊ¹ÓÃ×î´óµÄÂË²¨Æ÷ÏµÊı,Êı¾İµÄ²É¼¯Ê±¼ä´ó¸ÅÔÚ70ms,Æ½¾ù¹¦ÂÊÎª30uA¡£*/  
+/* åœ¨foreced modeä¸‹ï¼Œ1sçš„é‡‡æ ·å‘¨æœŸï¼Œæ¸©åº¦å’Œæ°”å‹ä½¿ç”¨æœ€ä½çš„ç²¾åº¦é‡‡é›†å¹¶ä¸”ä½¿ç”¨æœ€å°çš„æ»¤æ³¢å™¨ç³»æ•°,æ•°æ®çš„é‡‡é›†æ—¶é—´å¤§æ¦‚åœ¨6ms,å¹³å‡åŠŸç‡ä¸º3.27uAã€‚*/  
+/* åœ¨foreced modeä¸‹ï¼Œ1sçš„é‡‡æ ·å‘¨æœŸ, æ¸©åº¦å’Œæ°”å‹ä½¿ç”¨æœ€é«˜çš„ç²¾åº¦é‡‡é›†å¹¶ä¸”ä½¿ç”¨æœ€å¤§çš„æ»¤æ³¢å™¨ç³»æ•°,æ•°æ®çš„é‡‡é›†æ—¶é—´å¤§æ¦‚åœ¨70ms,å¹³å‡åŠŸç‡ä¸º30uAã€‚*/  
   
 typedef enum 
 {  
@@ -54,7 +54,7 @@ typedef enum
     BMP280_T_MODE_3,                                                           /*x4*/  
     BMP280_T_MODE_4,                                                           /*x8*/  
     BMP280_T_MODE_5                                                            /*x16*/  
-} BMP280_T_OVERSAMPLING;                                                       //¹ı²ÉÑù
+} BMP280_T_OVERSAMPLING;                                                       //è¿‡é‡‡æ ·
   
 typedef enum
 {	
@@ -74,7 +74,7 @@ typedef enum
 } BMP280_P_OVERSAMPLING;
 
 /************************************************/
-/**@name	          ¹¤×÷Ä£Ê½¶¨Òå
+/**@name	          å·¥ä½œæ¨¡å¼å®šä¹‰
 *************************************************/
 typedef enum
 {
@@ -108,33 +108,33 @@ typedef enum
 
 struct calib
 {
-	u16 dig_T1;                                                                /*Ğ£×¼T1Êı¾İ*/
-	s16 dig_T2;                                                                /*Ğ£×¼T2Êı¾İ*/
-	s16 dig_T3;                                                                /*Ğ£×¼T3Êı¾İ*/
-	u16 dig_P1;                                                                /*Ğ£×¼P1Êı¾İ*/
-	s16 dig_P2;                                                                /*Ğ£×¼P2Êı¾İ*/
-	s16 dig_P3;                                                                /*Ğ£×¼P3Êı¾İ*/
-	s16 dig_P4;                                                                /*Ğ£×¼P4Êı¾İ*/
-	s16 dig_P5;                                                                /*Ğ£×¼P5Êı¾İ*/
-	s16 dig_P6;                                                                /*Ğ£×¼P6Êı¾İ*/
-	s16 dig_P7;                                                                /*Ğ£×¼P7Êı¾İ*/
-	s16 dig_P8;                                                                /*Ğ£×¼P8Êı¾İ*/
-	s16 dig_P9;                                                                /*Ğ£×¼P9Êı¾İ*/
-	s32 t_fine;                                                                /*Ğ£×¼t_fineÊı¾İ*/
+	u16 dig_T1;                                                                /*æ ¡å‡†T1æ•°æ®*/
+	s16 dig_T2;                                                                /*æ ¡å‡†T2æ•°æ®*/
+	s16 dig_T3;                                                                /*æ ¡å‡†T3æ•°æ®*/
+	u16 dig_P1;                                                                /*æ ¡å‡†P1æ•°æ®*/
+	s16 dig_P2;                                                                /*æ ¡å‡†P2æ•°æ®*/
+	s16 dig_P3;                                                                /*æ ¡å‡†P3æ•°æ®*/
+	s16 dig_P4;                                                                /*æ ¡å‡†P4æ•°æ®*/
+	s16 dig_P5;                                                                /*æ ¡å‡†P5æ•°æ®*/
+	s16 dig_P6;                                                                /*æ ¡å‡†P6æ•°æ®*/
+	s16 dig_P7;                                                                /*æ ¡å‡†P7æ•°æ®*/
+	s16 dig_P8;                                                                /*æ ¡å‡†P8æ•°æ®*/
+	s16 dig_P9;                                                                /*æ ¡å‡†P9æ•°æ®*/
+	s32 t_fine;                                                                /*æ ¡å‡†t_fineæ•°æ®*/
 };
 
 struct bmp280
 {
-	struct calib calib_param;                                          /*Ğ£×¼Êı¾İ*/
-	u8 chip_id;                                                                /*´«¸ĞÆ÷ID*/                                                             
-	u8 oversamp_temperature;                                                   /*ÎÂ¶È²ÉÑù*/
-	u8 oversamp_pressure;                                                      /*ÆøÑ¹²ÉÑù*/
+	struct calib calib_param;                                          /*æ ¡å‡†æ•°æ®*/
+	u8 chip_id;                                                                /*ä¼ æ„Ÿå™¨ID*/                                                             
+	u8 oversamp_temperature;                                                   /*æ¸©åº¦é‡‡æ ·*/
+	u8 oversamp_pressure;                                                      /*æ°”å‹é‡‡æ ·*/
 	
 };
 
-#define BMP280_SlaveAddr 0x76                                                //BMP280µÄÆ÷¼şµØÖ·
+#define BMP280_SlaveAddr 0x76                                                //BMP280çš„å™¨ä»¶åœ°å€
 
-/*º¯Êı*/
+/*å‡½æ•°*/
 u8  BMP280_Init(void);
 u8  BMP280_Chack(void);
 u8  BMP280_CalibParam(void);

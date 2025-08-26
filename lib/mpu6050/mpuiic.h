@@ -2,25 +2,25 @@
 #define __MPUIIC_H
 #include "sys.h"
 
-//IO·½ÏòÉèÖÃ  ---PB11
-#define MPU_SDA_IN()  {GPIOB->CRH &= 0XFFFF0FFF;GPIOB->CRH |= 8<<12;}   //ÉÏÀ­/ÏÂÀ­ ÊäÈëÄ£Ê½
-#define MPU_SDA_OUT() {GPIOB->CRH &= 0XFFFF0FFF;GPIOB->CRH |= 3<<12;}		//ÍÆÍìÊä³ö  Êä³öÄ£Ê½
+//IOæ–¹å‘è®¾ç½®  ---PB11
+#define MPU_SDA_IN()  {GPIOB->CRH &= 0XFFFF0FFF;GPIOB->CRH |= 8<<12;}   //ä¸Šæ‹‰/ä¸‹æ‹‰ è¾“å…¥æ¨¡å¼
+#define MPU_SDA_OUT() {GPIOB->CRH &= 0XFFFF0FFF;GPIOB->CRH |= 3<<12;}		//æŽ¨æŒ½è¾“å‡º  è¾“å‡ºæ¨¡å¼
 
-//IO²Ù×÷º¯Êý	 
+//IOæ“ä½œå‡½æ•°	 
 #define MPU_IIC_SCL    PBout(10) 		//SCL
 #define MPU_IIC_SDA    PBout(11) 		//SDA	 
-#define MPU_READ_SDA   PBin(11) 		//ÊäÈëSDA 
+#define MPU_READ_SDA   PBin(11) 		//è¾“å…¥SDA 
 
-//IICËùÓÐ²Ù×÷º¯Êý
-void MPU_IIC_Delay(void);								//IICÑÓÊ±2msº¯Êý
-void MPU_IIC_Init(void);                //³õÊ¼»¯IICµÄIO¿Ú				 
-void MPU_IIC_Start(void);								//·¢ËÍIIC¿ªÊ¼ÐÅºÅ
-void MPU_IIC_Stop(void);	  						//·¢ËÍIICÍ£Ö¹ÐÅºÅ
-void MPU_IIC_Send_Byte(u8 txd);					//IIC·¢ËÍÒ»¸ö×Ö½Ú
-u8 MPU_IIC_Read_Byte(unsigned char ack);//IIC¶ÁÈ¡Ò»¸ö×Ö½Ú
-u8 MPU_IIC_Wait_Ack(void); 							//IICµÈ´ýACKÐÅºÅ
-void MPU_IIC_Ack(void);									//IIC·¢ËÍACKÐÅºÅ
-void MPU_IIC_NAck(void);								//IIC²»·¢ËÍACKÐÅºÅ
+//IICæ‰€æœ‰æ“ä½œå‡½æ•°
+void MPU_IIC_Delay(void);								//IICå»¶æ—¶2mså‡½æ•°
+void MPU_IIC_Init(void);                //åˆå§‹åŒ–IICçš„IOå£				 
+void MPU_IIC_Start(void);								//å‘é€IICå¼€å§‹ä¿¡å·
+void MPU_IIC_Stop(void);	  						//å‘é€IICåœæ­¢ä¿¡å·
+void MPU_IIC_Send_Byte(u8 txd);					//IICå‘é€ä¸€ä¸ªå­—èŠ‚
+u8 MPU_IIC_Read_Byte(unsigned char ack);//IICè¯»å–ä¸€ä¸ªå­—èŠ‚
+u8 MPU_IIC_Wait_Ack(void); 							//IICç­‰å¾…ACKä¿¡å·
+void MPU_IIC_Ack(void);									//IICå‘é€ACKä¿¡å·
+void MPU_IIC_NAck(void);								//IICä¸å‘é€ACKä¿¡å·
 
 
 void IMPU_IC_Write_One_Byte(u8 daddr,u8 addr,u8 data);

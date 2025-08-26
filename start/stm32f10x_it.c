@@ -35,7 +35,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-// ����ȫ�ֱ�־������������ѭ��������
+// 声明全局标志变量（用于主循环处理）
 //volatile uint8_t clock_failure_flag = 0;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -52,27 +52,27 @@
   */
 void NMI_Handler(void)
 {
-//	// 1. ����Ƿ�CSS�жϴ���
+//	// 1. 检查是否CSS中断触发
 //    if(RCC_GetITStatus(RCC_IT_CSS) == SET)
 //    {
-//        // 2. ǿ�����CSS�жϹ����־���������ؼ����裩
+//        // 2. 强制清除CSS中断挂起标志！！！（关键步骤）
 //        RCC_ClearITPendingBit(RCC_IT_CSS);
 
-//        // 3. ��¼ʱ�ӹ��ϱ�־��������������
+//        // 3. 记录时钟故障标志（供主程序处理）
 //        clock_failure_flag = 1;
 
-//        // 4. �����رտ�����Ӱ���Σ�����裨��������PWM��
+//        // 4. 立即关闭可能受影响的危险外设（如电机驱动PWM）
 //        TIM_Cmd(TIM1, DISABLE);
 //        TIM_Cmd(TIM8, DISABLE);
 
-//        // 5. �ֶ��л�ϵͳʱ�ӵ�HSI�����Ӳ��δ�Զ���ɣ�
+//        // 5. 手动切换系统时钟到HSI（如果硬件未自动完成）
 //        if(RCC_GetSYSCLKSource() != RCC_SYSCLKSource_HSI)
 //        {
-//            RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI); // �л�ʱ��Դ
-//            while(RCC_GetSYSCLKSource() != 0x04);   // �ȴ��л����
+//            RCC_SYSCLKConfig(RCC_SYSCLKSource_HSI); // 切换时钟源
+//            while(RCC_GetSYSCLKSource() != 0x04);   // 等待切换完成
 //        }
 
-//        // 6. �ر�HSE�͹�����PLL����ֹ�ظ����ϣ�
+//        // 6. 关闭HSE和关联的PLL（防止重复故障）
 //        RCC_HSEConfig(RCC_HSE_OFF);
 //        RCC_PLLCmd(DISABLE);
 //    }
@@ -184,16 +184,16 @@ void SysTick_Handler(void)
 }*/
 
 /**
- * @brief �豸��Ǳ��򿪺���Ҫ����ִ�еĲ���
- * @brief һ�㱻�����Ĳ�����Ҫ���ݾ��������д����ֱ�ӱ���,���Ƿ��ͱ�����Ϣ������������У�
- *        ��Щ����Ҫ���ݾ����������ܼ�����д��!!!
+ * @brief 设备外壳被打开后需要立即执行的操作
+ * @brief 一般被拆除后的操作，要根据具体情况来写，是直接报废,还是发送报警信息后继续正常运行，
+ *        这些都是要根据具体的需求才能继续编写的!!!
  *
  */
 // void TAMPER_IRQHandler(void)
 // {
 //   if(BKP_GetITStatus()==SET)
 //   {
-// /*****һ�㱻�����Ĳ�����Ҫ���ݾ��������д����ֱ�ӱ��ϻ��Ƿ��ͱ�����Ϣ������������У���Щ����Ҫ���ݾ����������ܼ�����д��******/
+// /*****一般被拆除后的操作，要根据具体情况来写，是直接报废还是发送报警信息后继续正常运行，这些都是要根据具体的需求才能继续编写的******/
 //     //app_start
 
 
@@ -203,21 +203,21 @@ void SysTick_Handler(void)
 //     BKP_ClearITPendingBit();
 //     /* Clear Tamper pin Event(TE) pending flag */
 //     BKP_ClearFlag();
-//     //����ϵͳ��λ
+//     //触发系统复位
 //     // NVIC_SystemReset();
 //   }
 // }
 
 // void USART1_IRQHandler(void)
 // {
-//   // printf("USART1_IRQHandler\r\n");//����ʱʹ��
-//   USART1_IRQHandler_IDLE_callback(); // ����USART1�����ж�
+//   // printf("USART1_IRQHandler\r\n");//调试时使用
+//   USART1_IRQHandler_IDLE_callback(); // 处理USART1空闲中断
 // }
 
 // void DMA1_Channel5_IRQHandler(void)
 // {
-//   // printf("DMA1_Channel5_IRQHandler\r\n");//����ʱʹ��
-//   DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(); // ����DMA1ͨ��5�������ж�
+//   // printf("DMA1_Channel5_IRQHandler\r\n");//调试时使用
+//   DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(); // 处理DMA1通道5接收满中断
 // }
 
 /**

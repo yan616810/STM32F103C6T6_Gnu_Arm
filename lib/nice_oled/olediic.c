@@ -8,7 +8,7 @@ void IIC_delay(void)
 	while(t--);
 }
 
-//ÆğÊ¼ĞÅºÅ
+//èµ·å§‹ä¿¡å·
 void I2C_Start(void)
 {
 	OLED_SDA_Set();
@@ -20,7 +20,7 @@ void I2C_Start(void)
 	IIC_delay();
 }
 
-//½áÊøĞÅºÅ
+//ç»“æŸä¿¡å·
 void I2C_Stop(void)
 {
 	OLED_SDA_Clr();
@@ -29,8 +29,8 @@ void I2C_Stop(void)
 	OLED_SDA_Set();
 }
 
-//µÈ´ıĞÅºÅÏìÓ¦
-void I2C_WaitAck(void) //²âÊı¾İĞÅºÅµÄµçÆ½
+//ç­‰å¾…ä¿¡å·å“åº”
+void I2C_WaitAck(void) //æµ‹æ•°æ®ä¿¡å·çš„ç”µå¹³
 {
 	OLED_SDA_Set();
 	IIC_delay();
@@ -40,13 +40,13 @@ void I2C_WaitAck(void) //²âÊı¾İĞÅºÅµÄµçÆ½
 	IIC_delay();
 }
 
-//Ğ´ÈëÒ»¸ö×Ö½Ú
+//å†™å…¥ä¸€ä¸ªå­—èŠ‚
 void Send_Byte(u8 dat)
 {
 	u8 i;
 	for(i=0;i<8;i++)
 	{
-		if(dat&0x80)//½«datµÄ8Î»´Ó×î¸ßÎ»ÒÀ´ÎĞ´Èë
+		if(dat&0x80)//å°†datçš„8ä½ä»æœ€é«˜ä½ä¾æ¬¡å†™å…¥
 		{
 			OLED_SDA_Set();
     }
@@ -57,7 +57,7 @@ void Send_Byte(u8 dat)
 		IIC_delay();
 		OLED_SCL_Set();
 		IIC_delay();
-		OLED_SCL_Clr();//½«Ê±ÖÓĞÅºÅÉèÖÃÎªµÍµçÆ½
+		OLED_SCL_Clr();//å°†æ—¶é’Ÿä¿¡å·è®¾ç½®ä¸ºä½ç”µå¹³
 		dat<<=1;
   }
 }
