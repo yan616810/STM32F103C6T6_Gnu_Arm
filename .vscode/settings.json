@@ -17,7 +17,11 @@
         "stddef.h": "c",
         "rtc.h": "c",
         "key.h": "c",
-        "iic.h": "c"
+        "iic.h": "c",
+        "u8g2_monochrome_display.h": "c",
+        "u8g2.h": "c",
+        "oled.h": "c",
+        "hw_iic.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }

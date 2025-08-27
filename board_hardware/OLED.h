@@ -2,7 +2,7 @@
 #define __OLED_H
 #include "stdint.h"
 
-#define OLED_device_addr 0x3c //7 bit addr
+#define OLED_device_addr 0x3c //7 bit addr -> 0x78
 
 #define OLED_Command_register_addr 0x00
 #define OLED_Data_register_addr    0x40

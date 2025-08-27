@@ -239,7 +239,7 @@ uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_p
 void u8g2_oled_init(u8g2_t *u8g2)
 {
 	u8g2_Setup_ssd1306_i2c_128x64_noname_f(u8g2,U8G2_R0,u8x8_byte_hw_i2c,u8x8_gpio_and_delay_for_hw_iic);
-	  u8g2_InitDisplay(u8g2);//in sleep
+	  u8g2_InitDisplay(u8g2);// send init sequence to the display, display is in sleep mode after this
 	  u8g2_SetPowerSave(u8g2,0);//disable sleep
 	  u8g2_ClearBuffer(u8g2);
 }

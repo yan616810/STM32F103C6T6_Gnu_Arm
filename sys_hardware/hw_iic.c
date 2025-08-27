@@ -52,8 +52,8 @@ uint8_t hw_iic_write_byte(uint8_t addr,uint8_t reg,uint8_t data)
     I2C_Send7bitAddress(I2C1,(addr<<1),I2C_Direction_Transmitter);
     if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))return 1;
 
-    I2C_SendData(I2C1,reg);
-    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTING))return 1;
+    I2C_SendData(I2C1,reg);//此行执行完，数据寄存器非空，移位寄存器空
+    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTING))return 1;//等待(移位寄存器非空，数据寄存器空)事件出现跳出while;该事件也就是I2C_EVENT_MASTER_BYTE_TRANSMITTING其本身的含义->从数据寄存器转移到移位寄存器中的比特正在传输中
 
     //程序运行到这里时，DR为空，移位寄存器刚要发送数据，如果下面程序紧接着向DR再传个数据
     //这里是个窗口期，等待从机应答前如果向DR发数据继续发送；否则就表示主机不想发数据了
@@ -99,17 +99,18 @@ uint8_t hw_iic_read_byte(uint8_t addr,uint8_t reg)
     if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_TRANSMITTED))return 1;
 //接收
     I2C_GenerateSTART(I2C1,ENABLE);
-    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_MODE_SELECT))return 1;
+    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_MODE_SELECT))return 1;//EV5
 
     I2C_Send7bitAddress(I2C1,(addr<<1),I2C_Direction_Receiver);
-    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))return 1;
+    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))return 1;//I2C 控制器进入接收模式，状态机自动触发 SCL 脉冲（8 个脉冲读取 1 字节数据）;解释了为何接收到从机的ACK后，主机竟然知道主动驱动SCL时钟引脚来驱动从机发字节
 
     I2C_AcknowledgeConfig(I2C1,DISABLE);//设置读完最后一个字节后主机不回应，提前设置不回应，才能在下面接受完成后立马发送主不回应
     I2C_GenerateSTOP(I2C1,ENABLE);//提前设置停止位，才能在下面接受完成后立马停止
-    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_RECEIVED))return 1;
+    if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_RECEIVED))return 1;//EV7表示接收完成并转移到了DR
 
     uint8_t dat = I2C_ReceiveData(I2C1);
-    I2C_AcknowledgeConfig(I2C1,ENABLE);//只有这里不需要主机回应，其他的命令都需要主机回应
+/****************************恢复默认的IIC应答配置**************************************** */
+    I2C_AcknowledgeConfig(I2C1,ENABLE);//只有这里不需要主机回应，其他的命令都需要主机回应，恢复默认的需要需要主机回应从机
     return dat;
 }
 
@@ -141,6 +142,7 @@ uint8_t hw_iic_read_byte_len(uint8_t addr,uint8_t reg,uint32_t len,uint8_t *data
         if(hw_iic_CheckEvent_timeout(I2C1,I2C_EVENT_MASTER_BYTE_RECEIVED))return 1;
         *data_buf++ = I2C_ReceiveData(I2C1);
     }
+/**************************恢复默认的IIC应答配置****************************************** */
     I2C_AcknowledgeConfig(I2C1,ENABLE);//恢复默认的需要需要主机回应从机
     return 0;
 }

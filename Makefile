@@ -23,23 +23,6 @@ OBJDIR = obj
 all: version build size #在终端只执行make时，默认执行version build size
 
 
-### Source files and search directories
-#匹配$(csrc/*.c)文件
-CSRC =	\
-		$(wildcard *.c) \
-    	$(wildcard start/*.c) \
-    	$(wildcard SPL/STM32F10x_StdPeriph_Driver/src/*.c) \
-    	$(wildcard SPL/CMSIS/CM3/*.c) \
-		sys_hardware/USART.c \
-		sys_hardware/Delay.c \
-		board_hardware/key.c \
-
-#匹配$(asrc/*.S)文件
-ASRC	=$(wildcard start/*.S)
-CSRCARM	=
-ASRCARM	=
-
-
 ### Include dirs, library dirs and definitions
 DEFS	=
 ADEFS	=
@@ -54,6 +37,28 @@ INCDIRS := \
 			board_hardware \
 			protocol \
 			lib \
+
+
+### Source files and search directories
+#匹配$(csrc/*.c)文件
+CSRC =	\
+		$(wildcard *.c) \
+    	$(wildcard start/*.c) \
+    	$(wildcard SPL/STM32F10x_StdPeriph_Driver/src/*.c) \
+    	$(wildcard SPL/CMSIS/CM3/*.c) \
+		sys_hardware/USART.c \
+		sys_hardware/Delay.c \
+		sys_hardware/hw_iic.c \
+		board_hardware/key.c \
+		board_hardware/OLED.c \
+		protocol/iic.c \
+
+
+
+#匹配$(asrc/*.S)文件
+ASRC	=$(wildcard start/*.S)
+CSRCARM	=
+ASRCARM	=
 
 
 ### Search directories (make uses VPATH to search source files)

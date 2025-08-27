@@ -96,12 +96,12 @@ SECTIONS
   _end = .;/*看你自己实现的stubs桩函数_sbrk()中使用的是什么符号标记！作用是：标记内存区域的结束地址,常用于 C 库（如 newlib）或你的启动代码里，用来确定堆（heap）或其他动态分配区的起始位置*/
   /* end = .; */
 
-  /* .heap (NOLOAD) : ALIGN(4)
+  .heap (NOLOAD) : ALIGN(4)
   {
   _heap_start = .;
-  . = . + 2K;
+  . = . + 1K;
   _heap_end = .;
-  } > RAM */
+  } > RAM
 
   .stack (NOLOAD) : ALIGN(8)/*此处使用8字节对齐为了支持浮点数*/
   {

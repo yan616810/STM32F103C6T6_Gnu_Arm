@@ -63,12 +63,13 @@
 
 /*IIC 搜索挂载软件IIC上的设备*/
 #include "iic.h"
+#include "hw_iic.h"
 
 // /*单色屏幕*/
 // #include "u8g2.h"
 // #include "u8g2_monochrome_display.h"
 // #include <string.h>//memset
-// // #include "OLED.h"
+#include "OLED.h"
 
 // /*旋转编码器*/
 // #include "Encoder.h"
@@ -513,11 +514,15 @@ int main(void)
 /*串口初始化*/
 	usart2_init();
 /*IIC协议端口初始化 && 以极低的协议速度搜索iic设备并通过串口打印地址信息*/
-	// IIC_InitPins_or_ChangePins(RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_8,RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_9);
-	// IIC_Set_speed(10);//防止iic协议速度过快，搜索不到低速设备
-	// IIC_Search_all_devices_printf_example();
-	// IIC_Set_speed(1);
+	IIC_InitPins_or_ChangePins(RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_8,RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_9);
+	IIC_Set_speed(10);//防止iic协议速度过快，搜索不到低速设备
+	IIC_Search_all_devices_printf_example();
+	IIC_Set_speed(1);
 /*oled初始化*/
+	hw_iic_init();
+	OLED_Init();
+	oled_image_binbin();
+/*u8g2单色屏初始化*/
 	// u8g2_oled_init(&u8g2);
 	// //u8g2_oled_play_Animation(&u8g2);
 	// u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
