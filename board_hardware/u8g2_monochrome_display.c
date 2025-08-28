@@ -21,6 +21,7 @@ void oled_pin_init(void)//SCL=PB8     SDA=PB9
 // 软件iic使用的回调
 uint8_t u8x8_gpio_and_delay_for_sw_iic(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
+  (void)arg_ptr;
 	uint32_t delay_us;
   switch(msg)
   {
@@ -107,6 +108,7 @@ uint8_t u8x8_gpio_and_delay_for_sw_iic(u8x8_t *u8x8, uint8_t msg, uint8_t arg_in
 //硬件iic使用的回调
 uint8_t u8x8_gpio_and_delay_for_hw_iic(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
+  (void)arg_ptr;
   uint8_t delay_us;
   switch(msg)
   {
@@ -146,7 +148,7 @@ uint8_t u8x8_gpio_and_delay_for_hw_iic(u8x8_t *u8x8, uint8_t msg, uint8_t arg_in
 uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
 {
   uint8_t *data;
-  uint8_t timeout;
+  uint8_t timeout=0;
   switch(msg)
   {
     case U8X8_MSG_BYTE_SEND:
@@ -183,7 +185,7 @@ uint8_t u8x8_byte_hw_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_p
     case U8X8_MSG_BYTE_SET_DC:
       break;
     case U8X8_MSG_BYTE_START_TRANSFER:
-      while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY));
+      while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY))
       {
           timeout++;Delay_us(1);
           if(timeout==100)
@@ -305,7 +307,8 @@ void u8g2_oled_draw_cube(void)
 }
 void creat_matrix(uint16_t w,uint16_t h)
 {
-
+  (void)w;
+  (void)h;
 }
 
 /*****************************GPS实时坐标以两条虚线显示在OLED12864全球缩略图上********************************************/

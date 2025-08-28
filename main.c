@@ -65,11 +65,13 @@
 #include "iic.h"
 #include "hw_iic.h"
 
-// /*单色屏幕*/
-// #include "u8g2.h"
-// #include "u8g2_monochrome_display.h"
-// #include <string.h>//memset
+/*单纯一个OLED*/
 #include "OLED.h"
+
+/*单色屏幕u8g2图形库*/
+#include "u8g2.h"
+#include "u8g2_monochrome_display.h"
+#include <string.h> //memset
 
 // /*旋转编码器*/
 // #include "Encoder.h"
@@ -105,9 +107,9 @@ volatile uint8_t key_cnt=10;
 
 // /*RTC*/
 // Type_Struct_Timezone_and_UTCxTime RTC_Init_And_Adjustment,RTC_read_RTCStruct;
-// //u8g2
-// u8g2_t u8g2;
-// char u8g2_buf[18];
+//u8g2
+u8g2_t u8g2;
+char u8g2_buf[18];
 // //秒计数器
 // uint16_t second;
 // //smg
@@ -519,28 +521,28 @@ int main(void)
 	IIC_Search_all_devices_printf_example();
 	IIC_Set_speed(1);
 /*oled初始化*/
-	hw_iic_init();
-	OLED_Init();
-	oled_image_binbin();
+	// hw_iic_init();
+	// OLED_Init();
+	// oled_image_binbin();
 /*u8g2单色屏初始化*/
-	// u8g2_oled_init(&u8g2);
-	// //u8g2_oled_play_Animation(&u8g2);
-	// u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
-	// u8g2_SetFontPosTop(&u8g2);
-	// u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
-	// u8g2_SetDrawColor(&u8g2,1);
-	// u8g2_ClearDisplay(&u8g2);
+	u8g2_oled_init(&u8g2);
+	u8g2_oled_play_Animation(&u8g2);
+	u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
+	u8g2_SetFontPosTop(&u8g2);
+	u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
+	u8g2_SetDrawColor(&u8g2,1);
+	u8g2_ClearDisplay(&u8g2);
 
-	// // u8g2_DrawStr(&u8g2,0,0*10,"X=");
-	// // u8g2_DrawStr(&u8g2,0,1*10,"Y=");
-	// // u8g2_DrawStr(&u8g2,0,2*10,"Z=");
-	// // u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
-	// // u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
-	// // u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
-	// // u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
-	// // u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
+	u8g2_DrawStr(&u8g2,0,0*10,"X=");
+	u8g2_DrawStr(&u8g2,0,1*10,"Y=");
+	u8g2_DrawStr(&u8g2,0,2*10,"Z=");
+	u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
+	u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
+	u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
+	u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
+	u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
 
-	// // u8g2_SendBuffer(&u8g2);
+	u8g2_SendBuffer(&u8g2);
 //LCD
 	// timer1_init();//测帧率时间
 

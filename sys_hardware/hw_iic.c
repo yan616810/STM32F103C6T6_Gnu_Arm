@@ -31,7 +31,7 @@ void hw_iic_init(void)
 
 uint8_t hw_iic_CheckEvent_timeout(I2C_TypeDef *I2Cx, uint32_t I2C_EVENT)
 {
-    uint8_t timeout;
+    uint8_t timeout=0;
     while(I2C_CheckEvent(I2Cx,I2C_EVENT) != SUCCESS)//DR和数据移位寄存器都是空
     {
         timeout++;Delay_us(1);
