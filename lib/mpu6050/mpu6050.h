@@ -3,19 +3,50 @@
 #include "stdint.h"   												  	  
 // #include "bitbang.h"
 
-//模块默认AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
-//如果接V3.3,则IIC地址为0X69(不包含最低位).
+/*模块默认AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).如果接V3.3,则IIC地址为0X69(不包含最低位).*/
 #define MPU_ADDR				0X68
-//MPU6050 AD0控制脚
-// #define MPU_AD0_CTRL			PAout(15)	//控制AD0电平,从而控制MPU地址
+/*MPU6050 AD0控制脚 控制AD0电平,从而控制MPU地址*/
+// #define MPU_AD0_CTRL			PAout(15)
+
+/***************************************底层通信协议宏定义接口*********************************************/
+/**********************************************
+函数名称：MPU_Write_Byte
+函数功能：IIC写一个字节
+函数参数：data:写入的数据    reg:要写的寄存器地址
+函数返回值：0,写入成功  其他,写入失败
+**********************************************/
+#define MPU_Write_Byte(reg, data)		IIC_Write_Byte(MPU_ADDR, reg, data)
+/**********************************************
+函数名称：MPU_Write_Len
+函数功能：IIC连续写(写器件地址、寄存器地址、数据)
+函数参数：reg:寄存器地址
+				 len:写入数据的长度  buf:数据区
+函数返回值：0,写入成功  其他,写入失败
+**********************************************/
+#define MPU_Write_Len(reg, len, buf)    IIC_Write_Len(MPU_ADDR, reg, len, buf)
+/**********************************************
+函数名称：MPU_Read_Byte
+函数功能：IIC读一个字节
+函数参数：reg:要读的寄存器地址
+函数返回值：res:读取到的数据
+**********************************************/
+#define MPU_Read_Byte(reg)				IIC_Read_Byte(MPU_ADDR, reg)
+/**********************************************
+函数名称：MPU_Read_Len
+函数功能：IIC连续读(写入器件地址后,读寄存器地址、数据)
+函数参数：reg:要读的寄存器地址
+		len:要读取的数据长度  buf:读取到的数据存储区
+函数返回值：0,读取成功  其他,读取失败
+**********************************************/
+#define MPU_Read_Len(reg, len, buf)		IIC_Read_Len(MPU_ADDR, reg, len, buf)
+/*********************************************底层通信协议宏定义接口end************************************/
 
 
 //#define MPU_ACCEL_OFFS_REG		0X06	//accel_offs寄存器,可读取版本号,寄存器手册未提到
 //#define MPU_PROD_ID_REG			0X0C	//prod id寄存器,在寄存器手册未提到
-
 #define MPU_SELF_TESTX_REG		0X0D	//自检寄存器X
 #define MPU_SELF_TESTY_REG		0X0E	//自检寄存器Y
-#define MPU_SELF_TESTZ_REG		0X0F	//自检寄存  器Z
+#define MPU_SELF_TESTZ_REG		0X0F	//自检寄存器Z
 #define MPU_SELF_TESTA_REG		0X10	//自检寄存器A
 #define MPU_SAMPLE_RATE_REG		0X19	//采样频率分频器
 #define MPU_CFG_REG				0X1A	//配置寄存器
@@ -82,10 +113,6 @@
 
 
 uint8_t MPU_Init(void); 						//初始化MPU6050
-uint8_t MPU_Write_Len(uint8_t reg,uint8_t len,uint8_t *buf);//IIC连续写
-uint8_t MPU_Read_Len(uint8_t reg,uint8_t len,uint8_t *buf); //IIC连续读 
-uint8_t MPU_Write_Byte(uint8_t reg,uint8_t data);		//IIC写一个字节
-uint8_t MPU_Read_Byte(uint8_t reg);				//IIC读一个字节
 
 uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr);
 uint8_t MPU_Set_Accel_Fsr(uint8_t fsr);

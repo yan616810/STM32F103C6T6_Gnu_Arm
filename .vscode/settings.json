@@ -21,7 +21,9 @@
         "u8g2_monochrome_display.h": "c",
         "u8g2.h": "c",
         "oled.h": "c",
-        "hw_iic.h": "c"
+        "hw_iic.h": "c",
+        "mpu6050.h": "c",
+        "inv_mpu_dmp_motion_driver.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }

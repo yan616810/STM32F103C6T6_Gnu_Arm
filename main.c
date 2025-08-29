@@ -525,24 +525,24 @@ int main(void)
 	// OLED_Init();
 	// oled_image_binbin();
 /*u8g2单色屏初始化*/
-	u8g2_oled_init(&u8g2);
-	u8g2_oled_play_Animation(&u8g2);
-	u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
-	u8g2_SetFontPosTop(&u8g2);
-	u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
-	u8g2_SetDrawColor(&u8g2,1);
-	u8g2_ClearDisplay(&u8g2);
+	// u8g2_oled_init(&u8g2);
+	// // u8g2_oled_play_Animation(&u8g2);
+	// u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
+	// u8g2_SetFontPosTop(&u8g2);
+	// u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
+	// u8g2_SetDrawColor(&u8g2,1);
+	// u8g2_ClearDisplay(&u8g2);
 
-	u8g2_DrawStr(&u8g2,0,0*10,"X=");
-	u8g2_DrawStr(&u8g2,0,1*10,"Y=");
-	u8g2_DrawStr(&u8g2,0,2*10,"Z=");
-	u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
-	u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
-	u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
-	u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
-	u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
+	// u8g2_DrawStr(&u8g2,0,0*10,"X=");
+	// u8g2_DrawStr(&u8g2,0,1*10,"Y=");
+	// u8g2_DrawStr(&u8g2,0,2*10,"Z=");
+	// u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
+	// u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
+	// u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
+	// u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
+	// u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
 
-	u8g2_SendBuffer(&u8g2);
+	// u8g2_SendBuffer(&u8g2);
 //LCD
 	// timer1_init();//测帧率时间
 

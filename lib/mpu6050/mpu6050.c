@@ -11,7 +11,8 @@
  * 
  */
 #include "mpu6050.h"
-#include "iic.h"   												  	  
+#include "iic.h"
+#include "hw_iic.h"   												  	  
 #include "Delay.h"
 
 /**********************************************
@@ -175,50 +176,4 @@ uint8_t MPU_Get_Accelerometer(short *ax,short *ay,short *az)
 		*az=((uint16_t)buf[4]<<8)|buf[5];
 	} 	
     return res;
-}
-
-/**********************************************
-函数名称：MPU_Write_Len
-函数功能：IIC连续写(写器件地址、寄存器地址、数据)
-函数参数：reg:寄存器地址
-				 len:写入数据的长度  buf:数据区
-函数返回值：0,写入成功  其他,写入失败
-**********************************************/
-uint8_t MPU_Write_Len(uint8_t reg,uint8_t len,uint8_t *buf)
-{
-	return IIC_Write_Len(MPU_ADDR,reg,len,buf);
-}
-
-/**********************************************
-函数名称：MPU_Read_Len
-函数功能：IIC连续读(写入器件地址后,读寄存器地址、数据)
-函数参数：reg:要读的寄存器地址
-		len:要读取的数据长度  buf:读取到的数据存储区
-函数返回值：0,读取成功  其他,读取失败
-**********************************************/
-uint8_t MPU_Read_Len(uint8_t reg,uint8_t len,uint8_t *buf)
-{
-	return IIC_Read_Len(MPU_ADDR,reg,len,buf);
-}
-
-/**********************************************
-函数名称：MPU_Write_Byte
-函数功能：IIC写一个字节
-函数参数：data:写入的数据    reg:要写的寄存器地址
-函数返回值：0,写入成功  其他,写入失败
-**********************************************/
-uint8_t MPU_Write_Byte(uint8_t reg,uint8_t data)
-{
-	return IIC_Write_Byte(MPU_ADDR,reg,data);
-}
-
-/**********************************************
-函数名称：MPU_Read_Byte
-函数功能：IIC读一个字节
-函数参数：reg:要读的寄存器地址
-函数返回值：res:读取到的数据
-**********************************************/
-uint8_t MPU_Read_Byte(uint8_t reg)
-{
-	return IIC_Read_Byte(MPU_ADDR,reg);
 }
