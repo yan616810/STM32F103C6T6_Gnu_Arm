@@ -12,7 +12,7 @@
  */
 #include "mpu6050.h"
 #include "iic.h"
-#include "hw_iic.h"   												  	  
+#include "hw_iic.h"				  	  
 #include "Delay.h"
 
 /**********************************************
@@ -22,7 +22,7 @@
 函数返回值：0,初始化成功  1,初始化失败
 **********************************************/
 uint8_t MPU_Init(void)
-{ 
+{
 	uint8_t res;
 	Delay_ms(100);//等待上电复位初始化完成才能读写寄存器
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
@@ -131,13 +131,13 @@ uint8_t MPU_Set_Rate(uint16_t rate)
 **********************************************/
 short MPU_Get_Temperature(void)
 {
-   uint8_t buf[2]; 
-   short raw;
-	 float temp;
-	 MPU_Read_Len(MPU_TEMP_OUTH_REG,2,buf); 
-   raw=((uint16_t)buf[0]<<8)|buf[1];
-   temp=36.53+((double)raw)/340;//35+521/340=36.5324
-   return temp*100;
+	uint8_t buf[2]; 
+	short raw;
+	float temp;
+	MPU_Read_Len(MPU_TEMP_OUTH_REG,2,buf); 
+	raw=((uint16_t)buf[0]<<8)|buf[1];
+	temp=36.53+((double)raw)/340;//35+521/340=36.5324
+	return temp*100;
 }
 
 /**********************************************

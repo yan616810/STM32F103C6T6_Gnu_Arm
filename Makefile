@@ -37,6 +37,7 @@ INCDIRS := \
 			board_hardware \
 			protocol \
 			lib/u8g2/csrc \
+			lib/mpu6050 \
 
 
 ### Source files and search directories
@@ -89,7 +90,8 @@ CSRC =	\
 		lib/u8g2/csrc/u8x8_setup.c \
 		lib/u8g2/csrc/u8x8_string.c \
 		lib/u8g2/csrc/u8x8_u8toa.c \
-		lib/u8g2/csrc/u8x8_u16toa.c
+		lib/u8g2/csrc/u8x8_u16toa.c \
+		lib/mpu6050/mpu6050.c \
 
 
 

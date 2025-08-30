@@ -120,3 +120,18 @@ int _fstat(int file, struct stat *st) {
 int _isatty(int file) {
     return 1; // 假装是终端
 }
+
+void _exit(int status) {
+    while (1) { // 无限循环，模拟程序终止
+        __asm__("nop");
+    }
+}
+
+int _kill(int pid, int sig) {
+    errno = EINVAL;
+    return -1;
+}
+
+int _getpid(void) {
+    return 1; // 返回一个默认PID
+}
