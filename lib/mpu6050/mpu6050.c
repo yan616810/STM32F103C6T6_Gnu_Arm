@@ -33,7 +33,15 @@ uint8_t MPU_Init(void)
 		MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X01);	//唤醒MPU6050 && 使用x轴时钟,必须先唤醒，否则无法写某些寄存器
 		MPU_Set_Gyro_Fsr(0);					//陀螺仪传感器,±250dps
 		MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
+		
 		MPU_Set_Rate(200);						//设置采样率200Hz，据奈奎斯特，实际能够使用的信号的频谱最大频率为100HZ，再高频的震荡看作噪声由DLPF滤去
+	/*对于竞速fpv，通常不使用mpu6050硬件低通滤波器DLPF，因为他的带宽截止频率只有确定的几个最宽的只有256hz(可捕获到的信号变化频率最大为256hz);
+		而使用软件低通滤波器，只需要在数字域就可以做各种处理灵活性更好
+		下面两行：1.禁用DLPF；陀螺仪8khz，加速度计1khz，直接传到分频器前的内部寄存器
+				 2.设置分频器不分频；加速度计如果采样频率大于1kHz，1khz的原始数据会以高于1khz传到数据寄存器，会有重复*/
+		// MPU_Write_Byte(MPU_CFG_REG,0x07);			//禁用DLPF，陀螺仪采样频率为8KHZ
+		// MPU_Write_Byte(MPU_SAMPLE_RATE_REG,0x00);	//设置不分频，陀螺仪寄存器数据更新频率为8kHz，加速度计更新频率也为8kHz(RM p10->注:加速度计输出速率为1kHz。这意味着，对于1kHz以上的采样速率，同一加速度计样本可能会多次输出到FIFO、DMP和传感器寄存器。)
+
 		MPU_Write_Byte(MPU_INT_EN_REG,0X00);		//关闭所有中断
 		MPU_Write_Byte(MPU_USER_CTRL_REG,0X00);	//I2C主模式关闭
 		MPU_Write_Byte(MPU_FIFO_EN_REG,0X00);		//关闭FIFO
