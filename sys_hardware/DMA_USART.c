@@ -3,11 +3,16 @@
  * @author your name (you@domain.com)
  * @brief DMA双缓冲机制实现无缝接收串口数据并拷贝到LWRB环形缓冲区中 DMA+USART1+LWRB
  * 1.先在外部，如主程序中初始化一个LWRB环形缓冲区;
- * 2.使用DMA_link_lwrb_t()链接外部环形缓冲区;
+ * 2.使用DMA_link_lwrb_t()链接外部环形缓冲区;（x）
  * 3.调用DMA_usart1_to_arrybuffer_init() 1.初始化DMA功能及其中断; 2.初始化usart1的空闲中断(前提是usart1时钟等已提前初始化); 3.并立即开始DMA转运;
  * 
  * 注意：应该设置串口空闲中断优先级低于DMA1通道5的中断优先级,这是保险措施，但不是致命的必要条件。
- * @version 0.1
+ * 
+ * 2025/8/31：
+ *  1. 增加GPS模块初始化函数等；
+ *  2. 增加GPS数据解析函数等；
+ *  3. 目前只支持挂载一个GPS芯片，后续考虑面向对象......
+ * @version 0.2
  * @date 2025-06-03
  * 
  * @copyright Copyright (c) 2025
@@ -16,30 +21,30 @@
 #include "DMA_USART.h"
 #include "stm32f10x.h"
 #include "lwrb.h"
+#include "lwgps.h"
 
-/*定义双缓冲区*/
-#define DMA_BUF_SIZE (uint16_t)128  // 适当增大缓冲区，最好大于单帧报文的长度
+/*定义双缓冲区double buffer*/
+static   uint8_t  dma_buf1[DMA_BUF_SIZE], dma_buf2[DMA_BUF_SIZE];  //双缓冲，大小考量看笔记项目定位器
+static volatile uint8_t dma_buf_index = 0;                                // 区分 0: buf1, 1: buf2
 
-uint8_t  dma_buf1[DMA_BUF_SIZE], dma_buf2[DMA_BUF_SIZE];  //双缓冲，大小考量看笔记项目定位器
-volatile uint8_t dma_buf_index = 0;                       // 区分 0: buf1, 1: buf2
+/*环形缓冲区LWRB*/
+static lwrb_t buff_1;                       //定义一个环形缓冲区实例
+static uint8_t buffdata_1[DMA_BUF_SIZE*8];  //大于等于DMA缓冲区4倍，动态调整
 
-static lwrb_t *static_rb_buff;  //链接外部定义的环形缓冲区
-
- /**
-  * @brief 链接外部定义的环形缓冲区
-  * 
-  * @param rb_buff lwrb_t型结构体指针，指明保存在dma双缓冲区中的数据，转运到哪个外部环形缓冲区
-  */
-void DMA_link_lwrb_t(lwrb_t *rb_buff)
+/**
+ * @brief 初始化一个环形缓冲区
+ * 
+ */
+static void init_lwrb(void)
 {
-    static_rb_buff = rb_buff;
+    lwrb_init(&buff_1, buffdata_1,sizeof(buffdata_1));   //初始化gps模块使用到的环形缓冲区
 }
 
 /**
  * @brief 配置usart1 + 使用DMA1的通道5，通过双缓冲机制
  * 
  */
-void DMA_usart1_to_arrybuffer_init(void)
+static void DMA_usart1_to_arrybuffer_init(void)
 {
     /*1.开启DMA1时钟*/
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -49,8 +54,8 @@ void DMA_usart1_to_arrybuffer_init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
     /*4.配置GPIOA9和GPIOA10为复用推挽输出和输入*/
     GPIO_InitTypeDef GPIO_InitStruct = {
-        .GPIO_Pin   = GPIO_Pin_9,            // PA9
-        .GPIO_Mode  = GPIO_Mode_AF_PP,            // 推挽输出
+        .GPIO_Pin  = GPIO_Pin_9,        // PA9
+        .GPIO_Mode = GPIO_Mode_AF_PP,   // 推挽输出
         .GPIO_Speed = GPIO_Speed_50MHz,
     };
     GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -59,7 +64,7 @@ void DMA_usart1_to_arrybuffer_init(void)
     GPIO_Init(GPIOA, &GPIO_InitStruct);
     /*5.配置USART1波特率9600,8位数据位,无校验位,1位停止位*/
     USART_InitTypeDef USART_InitStruct = {
-        .USART_BaudRate = 9600,
+        .USART_BaudRate = USART_BaudRate_bps,
         .USART_WordLength = USART_WordLength_8b,
         .USART_StopBits = USART_StopBits_1,
         .USART_Parity = USART_Parity_No,
@@ -99,7 +104,7 @@ void DMA_usart1_to_arrybuffer_init(void)
     DMA_Init(DMA1_Channel5,&DMA_InitStruct);
     DMA_ITConfig(DMA1_Channel5,DMA_IT_TC,ENABLE);
 
-//    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+//  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 //	NVIC_InitTypeDef NVIC_InitStruct;
 	NVIC_InitStruct.NVIC_IRQChannel                   = DMA1_Channel5_IRQn;  // DMA1通道5中断
 	NVIC_InitStruct.NVIC_IRQChannelCmd                = ENABLE;
@@ -145,7 +150,7 @@ void DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(void)
         DMA1_Channel5->CCR |= DMA_CCR5_EN;                     //开启DMA传输
 
         //将full_buf指向的填满数据的dma_bufx拷贝到LWRB环形缓冲区
-        lwrb_write(static_rb_buff,full_buf,DMA_BUF_SIZE);
+        lwrb_write(&buff_1,full_buf,DMA_BUF_SIZE);
         
         DMA_ClearITPendingBit(DMA1_IT_TC5);
     }
@@ -185,15 +190,40 @@ void USART1_IRQHandler_IDLE_callback(void)
         }
         
         DMA1_Channel5->CMAR   = (uint32_t)next_buf;      // 立即切换到下一个缓冲区
-        DMA1_Channel5->CNDTR  = (uint16_t)DMA_BUF_SIZE;  // 重新设置传输数据量
+        DMA1_Channel5->CNDTR  = (uint32_t)DMA_BUF_SIZE;  // 重新设置传输数据量
         DMA1_Channel5->CCR   |= DMA_CCR5_EN;             // 重新使能DMA
 
         // 将实际接收到的数据从当前缓冲区写入LWRB环形缓冲区
         if (received > 0 && received <= DMA_BUF_SIZE)
         {
             // 从缓冲区头部起始写入实际接收到的数据
-            lwrb_write(static_rb_buff, cur_buf, received);
+            lwrb_write(&buff_1, cur_buf, received);
         }
+    }
+}
+
+void GPS_Init_all_module(void)
+{
+    // 初始化GPS所依赖的的软件：初始化stm32内的一个大小合适的环形缓冲区
+    init_lwrb();
+    // 初始化GPS模块所依赖硬件：USART+DMA配置并启动工作
+    DMA_usart1_to_arrybuffer_init();
+}
+
+/**
+ * @brief GPS解析任务，解析器流式解析环形缓冲区的数据
+ * 
+ * @param lwgps_handle lwgps库中的lwgps_t指针型变量;
+ * 作用：将从环形缓冲区解析得到的GPS模块所有的信息，存储到此指针指向的外部lwgps_t类型的变量！
+ */
+void GPS_Parser_lwrb(lwgps_t* lwgps_handle)
+{
+	uint8_t temp_buf[DMA_BUF_SIZE];//建议temp_buf大小与DMA缓冲区一致
+    size_t len; 
+    /*尝试从环形缓冲区读取数据*/
+    while ((len = lwrb_read(&buff_1, temp_buf, sizeof(temp_buf))) > 0) {
+        /*送入LWGPS解析*/
+        lwgps_process(lwgps_handle, temp_buf, len);//lwgps_process()本身是流式解析，处理速度很快。
     }
 }
 

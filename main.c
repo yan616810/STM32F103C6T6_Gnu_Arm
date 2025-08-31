@@ -87,7 +87,7 @@
 
 /*环形缓冲区*/
 // #include "ringbuff.h"
-#include "lwrb.h"
+
 
 /*DMA + USART1 + LWRB + LWGPS*/
 #include "DMA_USART.h"
@@ -128,14 +128,11 @@ char u8g2_buf[18];
 /*mpu6050不使用DMP库*/
 // int mpu6050_init_result=1;//1表示初始化失败
 // short gx,gy,gz,ax,ay,az,temperature;
-// //flash
+/*flash*/
 // uint8_t flash_buf[1024];
 /*自写ringbuff.c创建一个环形缓冲区句柄rb_1*/
 // RING_BUF_DEF(rb_1,10);
-/*LWRB*/
-lwrb_t buff_1;
-uint8_t buffdata_1[1024];//大于等于DMA缓冲区4倍
-// //LWGPS
+/*LWGPS*/
 lwgps_t lwgps_handle;
 
 /************************tamp var************************ */
@@ -271,22 +268,12 @@ void key_task()
 	}
 }
 
-void gps_task(void)
-{
-	uint8_t temp_buf[128];//建议temp_buf大小与DMA缓冲区一致
-    size_t len;
-// 
-    // 尝试从环形缓冲区读取数据
-    while ((len = lwrb_read(&buff_1, temp_buf, sizeof(temp_buf))) > 0) {
-        // 送入LWGPS解析
-        lwgps_process(&lwgps_handle, temp_buf, len);//lwgps_process()本身是流式解析，处理速度很快。
-    }
-}
+
 
 void task_proc(void)
 {
 	/*LWGPS解析DMA.c接收到缓冲区中的数据*/
-	gps_task();
+	GPS_Parser_lwrb(&lwgps_handle);
 	if(second_cnt == 1000)//1s
 	{
 		second_cnt=0;
@@ -643,9 +630,7 @@ int main(void)
 	// }else{
 	// 	printf("DMP Init Success!\r\n");
 	// }
-//OV7670
-
-//W25Q128 Flash
+/*W25Q128 Flash*/
 	// W25Q128_Init();
 	// uint8_t MID;uint16_t DID;
 	// W25Q128_Read_id(&MID,&DID);
@@ -719,12 +704,11 @@ int main(void)
 	// printf("\r\n");
 
 /*LWGPS*/
-	lwgps_init(&lwgps_handle);//GPS报文解析器句柄初始化
-	lwrb_init(&buff_1, buffdata_1,sizeof(buffdata_1));  //初始化DMA双缓冲使用到的环形缓冲区
-	DMA_link_lwrb_t(&buff_1);                            //链接外部定义的环形缓冲区,供DMA_USART.c使用
-	DMA_usart1_to_arrybuffer_init();                     //配置usart1 + 使用DMA1的通道5，通过双缓冲机制
+	lwgps_init(&lwgps_handle);  		 //GPS报文解析器句柄初始化
+	GPS_Init_all_module();               //初始化一个GPS所依赖的软硬件环境
 	/*执行到这里是DMA已经可以自动从usart1接收数据并自动拷贝到LWRB的环形缓冲区中*/
 	printf("DMA usart1 to lwrb init success!\r\n");
+/*OV7670*/
 
 /*任务滴答*/
 	timer2_init();
