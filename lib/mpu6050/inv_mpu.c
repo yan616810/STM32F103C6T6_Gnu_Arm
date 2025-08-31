@@ -30,6 +30,7 @@
 //#include "msp430_clock.h"
 //#include "msp430_interrupt.h"
 #include "iic.h"
+#include "hw_iic.h"
 #define i2c_write(addr,reg,num,p_buf)   IIC_Write_Len(addr,reg,num,p_buf)
 #define i2c_read(addr,reg,num,p_buf)    IIC_Read_Len(addr,reg,num,p_buf)
 #define delay_ms    Delay_ms

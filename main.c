@@ -77,9 +77,9 @@
 // #include "Encoder.h"
 
 /*mpu6050*/
-// #include "mpu6050_dmp.h"
+#include "mpu6050_dmp.h"
 // // #include "inv_mpu.h"
-#include "mpu6050.h"
+// #include "mpu6050.h"
 
 // /*flash W25q128*/
 // #include "w25q128.h"
@@ -98,12 +98,12 @@
 
 
 // //DMP库，fifo容量有限，尝试最佳时间，避免溢出或读取过快
-// #define dmp_get_fifo  10//10ms读一次mpu6050 fifo
+#define dmp_get_fifo  10//10ms读一次mpu6050 fifo
 
 // volatile uint16_t second_cnt=1000;
 volatile uint8_t key_cnt=10;
 volatile uint8_t ms_cnt=100;
-// volatile uint8_t ms_25_cnt=dmp_get_fifo;
+volatile uint8_t mpu6050_dmp_cnt=dmp_get_fifo;
 
 // /*RTC*/
 // Type_Struct_Timezone_and_UTCxTime RTC_Init_And_Adjustment,RTC_read_RTCStruct;
@@ -116,15 +116,15 @@ char u8g2_buf[18];
 // uint8_t smg_ui_root;
 // //编码器
 // int16_t encoder_value;
-// //mpu6050 DMP库模式传输至匿名上位机
-// int dmp_result;
-// float pitch,roll,yaw;
-// char niming[13]={0xaa,0xff,0x03,7,};
-// int16_t roll_temp;
-// int16_t pitch_temp;
-// int16_t yaw_temp;
-// uint8_t sumcheck; 
-// uint8_t addcheck; 
+/*mpu6050 DMP库模式传输至匿名上位机*/
+int dmp_result;
+float pitch,roll,yaw;
+char niming[13]={0xaa,0xff,0x03,7,};
+int16_t roll_temp;
+int16_t pitch_temp;
+int16_t yaw_temp;
+uint8_t sumcheck; 
+uint8_t addcheck; 
 /*mpu6050不使用DMP库*/
 int mpu6050_init_result=1;//1表示初始化失败
 short gx,gy,gz,ax,ay,az,temperature;
@@ -203,7 +203,7 @@ void TIM2_IRQHandler(void)//1ms
 		// if(second_cnt<1000)second_cnt++;
 		if(ms_cnt<100)ms_cnt++;
 		if(key_cnt<10)key_cnt++;
-		// if(ms_25_cnt<dmp_get_fifo)ms_25_cnt++;
+		if(mpu6050_dmp_cnt<dmp_get_fifo)mpu6050_dmp_cnt++;
 		TIM_ClearITPendingBit(TIM2,TIM_IT_Update);
 	}
 }
@@ -216,9 +216,6 @@ void key_task()
 	if(key_value=='L')//长按B13
 	{
 		key_value=0;
-		GPIOC->ODR ^= GPIO_Pin_13;
-		Delay_ms(500);
-		GPIOC->ODR ^= GPIO_Pin_13;
 	}
 	else if(key_value=='D')//双击B13
 	{
@@ -368,52 +365,52 @@ void task_proc(void)
 	if(ms_cnt==100)//100ms
 	{
 		ms_cnt=0;
-//mpu6050
-		MPU_Get_Gyroscope(&gx,&gy,&gz);
-		MPU_Get_Accelerometer(&ax,&ay,&az);
-		temperature = MPU_Get_Temperature();
-		// 将上一次画布缓冲区角速度旧值区域填充空Box
-		u8g2_SetDrawColor(&u8g2,0);
-		u8g2_DrawBox(&u8g2,2*7,0*10,6*7,1*10);
-		u8g2_DrawBox(&u8g2,2*7,1*10,6*7,1*10);
-		u8g2_DrawBox(&u8g2,2*7,2*10,6*7,1*10);
-		// 在缓冲区空Box处写入角速度数据
-		u8g2_SetDrawColor(&u8g2,1);
-		memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
-		sprintf(u8g2_buf,"%+6d",gx);
-		u8g2_DrawStr(&u8g2,2*7,0*10,u8g2_buf);
-		memset(u8g2_buf,0,sizeof(u8g2_buf));
-		sprintf(u8g2_buf,"%+6d",gy);
-		u8g2_DrawStr(&u8g2,2*7,1*10,u8g2_buf);
-		memset(u8g2_buf,0,sizeof(u8g2_buf));
-		sprintf(u8g2_buf,"%+6d",gz);
-		u8g2_DrawStr(&u8g2,2*7,2*10,u8g2_buf);
-		// 将上一次画布缓冲区重力加速度旧值区域填充空Box
-		u8g2_SetDrawColor(&u8g2,0);
-		u8g2_DrawBox(&u8g2,11*7,0*10,6*7,10);
-		u8g2_DrawBox(&u8g2,11*7,1*10,6*7,10);
-		u8g2_DrawBox(&u8g2,11*7,2*10,6*7,10);
-		// 在缓冲区空Box处写入重力加速度数据
-		u8g2_SetDrawColor(&u8g2,1);
-		memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
-		sprintf(u8g2_buf,"%+6d",ax);
-		u8g2_DrawStr(&u8g2,11*7,0*10,u8g2_buf);
-		memset(u8g2_buf,0,sizeof(u8g2_buf));
-		sprintf(u8g2_buf,"%+6d",ay);
-		u8g2_DrawStr(&u8g2,11*7,1*10,u8g2_buf);
-		memset(u8g2_buf,0,sizeof(u8g2_buf));
-		sprintf(u8g2_buf,"%+6d",az);
-		u8g2_DrawStr(&u8g2,11*7,2*10,u8g2_buf);
-		//将上一次画布缓冲区中的温度值旧值区域填充空box
-		u8g2_SetDrawColor(&u8g2,0);
-		u8g2_DrawBox(&u8g2,5*7,5*10,18*7,10);
-		//在缓冲区空box处写入温度值
-		u8g2_SetDrawColor(&u8g2,1);
-		memset(u8g2_buf,0,sizeof(u8g2_buf));
-		sprintf(u8g2_buf,"%+d.%02d",temperature/100,temperature%100);
-		u8g2_DrawStr(&u8g2,5*7,5*10,u8g2_buf);
+/*mpu6050 不使用DMP库*/
+		// MPU_Get_Gyroscope(&gx,&gy,&gz);
+		// MPU_Get_Accelerometer(&ax,&ay,&az);
+		// temperature = MPU_Get_Temperature();
+		// // 将上一次画布缓冲区角速度旧值区域填充空Box
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,2*7,0*10,6*7,1*10);
+		// u8g2_DrawBox(&u8g2,2*7,1*10,6*7,1*10);
+		// u8g2_DrawBox(&u8g2,2*7,2*10,6*7,1*10);
+		// // 在缓冲区空Box处写入角速度数据
+		// u8g2_SetDrawColor(&u8g2,1);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
+		// sprintf(u8g2_buf,"%+6d",gx);
+		// u8g2_DrawStr(&u8g2,2*7,0*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",gy);
+		// u8g2_DrawStr(&u8g2,2*7,1*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",gz);
+		// u8g2_DrawStr(&u8g2,2*7,2*10,u8g2_buf);
+		// // 将上一次画布缓冲区重力加速度旧值区域填充空Box
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,11*7,0*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,11*7,1*10,6*7,10);
+		// u8g2_DrawBox(&u8g2,11*7,2*10,6*7,10);
+		// // 在缓冲区空Box处写入重力加速度数据
+		// u8g2_SetDrawColor(&u8g2,1);
+		// memset(u8g2_buf, 0, sizeof(u8g2_buf));  // 将数组所有字节设为0
+		// sprintf(u8g2_buf,"%+6d",ax);
+		// u8g2_DrawStr(&u8g2,11*7,0*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",ay);
+		// u8g2_DrawStr(&u8g2,11*7,1*10,u8g2_buf);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+6d",az);
+		// u8g2_DrawStr(&u8g2,11*7,2*10,u8g2_buf);
+		// //将上一次画布缓冲区中的温度值旧值区域填充空box
+		// u8g2_SetDrawColor(&u8g2,0);
+		// u8g2_DrawBox(&u8g2,5*7,5*10,18*7,10);
+		// //在缓冲区空box处写入温度值
+		// u8g2_SetDrawColor(&u8g2,1);
+		// memset(u8g2_buf,0,sizeof(u8g2_buf));
+		// sprintf(u8g2_buf,"%+d.%02d",temperature/100,temperature%100);
+		// u8g2_DrawStr(&u8g2,5*7,5*10,u8g2_buf);
 
-		u8g2_SendBuffer(&u8g2);
+		// u8g2_SendBuffer(&u8g2);
 	//RTC
 		// memset(u8g2_buf, 0, sizeof(u8g2_buf));
 		// sprintf(u8g2_buf,"%4d",RTC_read_RTCStruct.UTCxTime.tm_year);
@@ -473,42 +470,42 @@ void task_proc(void)
 
 		// u8g2_SendBuffer(&u8g2);
 	}
-	// if(ms_25_cnt==dmp_get_fifo)
-	// {
-	// 	ms_25_cnt=0;
-	//MPU6050中DMP数据
-		// if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
-    	// // else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
-		// else{
-		// 	roll_temp = roll*100;
-		// 	pitch_temp = pitch*100;
-		// 	yaw_temp = yaw*100;
-		// 	sumcheck = 0; 
-		// 	addcheck = 0; 
-		// 	niming[4]=(uint8_t)(roll_temp);
-		// 	niming[5]=(uint8_t)(roll_temp>>8);
-		// 	niming[6]=(uint8_t)(pitch_temp);
-		// 	niming[7]=(uint8_t)(pitch_temp>>8);
-		// 	niming[8]=(uint8_t)(yaw_temp);
-		// 	niming[9]=(uint8_t)(yaw_temp>>8);
-		// 	niming[10]=0x01;
-		// 	for(uint8_t i=0; i < (niming[3]+4); i++) 
-		// 	{ 
-		// 		sumcheck += niming[i];
-		// 		addcheck += sumcheck;  
-		// 	}
-		// 	niming[11]=sumcheck;
-		// 	niming[12]=addcheck;
-		// 	for(uint8_t i=0;i<13;i++)
-		// 	{
-		// 		usart2_send_Char(niming[i]);
-		// 	}
-		// }
+	if(mpu6050_dmp_cnt==dmp_get_fifo)
+	{
+		mpu6050_dmp_cnt=0;
+	/*MPU6050中DMP数据*/
+		if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
+    	// else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
+		else{
+			roll_temp = roll*100;
+			pitch_temp = pitch*100;
+			yaw_temp = yaw*100;
+			sumcheck = 0; 
+			addcheck = 0; 
+			niming[4]=(uint8_t)(pitch_temp);
+			niming[5]=(uint8_t)(pitch_temp>>8);
+			niming[6]=(uint8_t)(roll_temp);
+			niming[7]=(uint8_t)(roll_temp>>8);
+			niming[8]=(uint8_t)(yaw_temp);
+			niming[9]=(uint8_t)(yaw_temp>>8);
+			niming[10]=0x01;
+			for(uint8_t i=0; i < (niming[3]+4); i++) 
+			{ 
+				sumcheck += niming[i];
+				addcheck += sumcheck;  
+			}
+			niming[11]=sumcheck;
+			niming[12]=addcheck;
+			for(uint8_t i=0;i<13;i++)
+			{
+				usart1_send_Char(niming[i]);
+			}
+		}
 	//RTC实时时钟
 		// RTC_get_DataStruct(&RTC_read_RTCStruct,&RTC_Init_And_Adjustment);
 	//编码器
 		// encoder_value = Encoder_get_value();
-	// }
+	}
 }
 
 int main(void)
@@ -528,7 +525,7 @@ int main(void)
 /*按键初始化*/
 	key_init();
 /*串口初始化*/
-	usart2_init();
+	usart1_init();
 /*IIC协议端口初始化 && 以极低的协议速度搜索iic设备并通过串口打印地址信息*/
 	IIC_InitPins_or_ChangePins(RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_8,RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_9);
 	IIC_Set_speed(10);//防止iic协议速度过快，搜索不到低速设备
@@ -539,25 +536,25 @@ int main(void)
 	// OLED_Init();
 	// oled_image_binbin();
 /*u8g2单色屏初始化*/
-	u8g2_oled_init(&u8g2);
-	// u8g2_oled_play_Animation(&u8g2);
-	u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
-	u8g2_SetFontPosTop(&u8g2);
-	u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
-	u8g2_SetDrawColor(&u8g2,1);
-	u8g2_ClearDisplay(&u8g2);
+	// u8g2_oled_init(&u8g2);
+	// // u8g2_oled_play_Animation(&u8g2);
+	// u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
+	// u8g2_SetFontPosTop(&u8g2);
+	// u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
+	// u8g2_SetDrawColor(&u8g2,1);
+	// u8g2_ClearDisplay(&u8g2);
 
-	u8g2_DrawStr(&u8g2,0,0*10,"X=");
-	u8g2_DrawStr(&u8g2,0,1*10,"Y=");
-	u8g2_DrawStr(&u8g2,0,2*10,"Z=");
-	u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
-	u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
-	u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
-	u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
-	u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
-	u8g2_DrawStr(&u8g2,0,5*10,"Tem->");
+	// u8g2_DrawStr(&u8g2,0,0*10,"X=");
+	// u8g2_DrawStr(&u8g2,0,1*10,"Y=");
+	// u8g2_DrawStr(&u8g2,0,2*10,"Z=");
+	// u8g2_DrawStr(&u8g2,0,3*10,"Gyro");
+	// u8g2_DrawStr(&u8g2,9*7,0*10,"X=");
+	// u8g2_DrawStr(&u8g2,9*7,1*10,"Y=");
+	// u8g2_DrawStr(&u8g2,9*7,2*10,"Z=");
+	// u8g2_DrawStr(&u8g2,9*7,3*10,"Acce");
+	// u8g2_DrawStr(&u8g2,0,5*10,"Tem->");
 
-	u8g2_SendBuffer(&u8g2);
+	// u8g2_SendBuffer(&u8g2);
 //LCD
 	// timer1_init();//测帧率时间
 
@@ -634,21 +631,21 @@ int main(void)
 	// u8g2_DrawStr(&u8g2,0,5*10,"sec ->");
 	// u8g2_SendBuffer(&u8g2);
 /*mpu6050初始化*/
-	mpu6050_init_result = MPU_Init();
-	if(mpu6050_init_result != 0)
-	{//有错误
-		printf("MPU6050 init error->%d\r\n",mpu6050_init_result);
-		while(1);
-	}
-/*mpu6050 dmp初始化*/
-	// dmp_result = MPU6050_Init_UseDmp();
-	// if(dmp_result != 0)
+	// mpu6050_init_result = MPU_Init();
+	// if(mpu6050_init_result != 0)
 	// {//有错误
-	// 	printf("DMP Init error->%d\r\n",dmp_result);
-	// 	Delay_ms(500);//在获取fifo数据时，若获取失败，不要延时，避免fifo溢出
-	// }else{
-	// 	printf("DMP Init Success!\r\n");
+	// 	printf("MPU6050 init error->%d\r\n",mpu6050_init_result);
+	// 	while(1);
 	// }
+/*mpu6050 dmp初始化*/
+	dmp_result = MPU6050_Init_UseDmp();
+	if(dmp_result != 0)
+	{//有错误
+		printf("DMP Init error->%d\r\n",dmp_result);
+		Delay_ms(500);//在获取fifo数据时，若获取失败，不要延时，避免fifo溢出
+	}else{
+		printf("DMP Init Success!\r\n");
+	}
 //OV7670
 
 //W25Q128 Flash

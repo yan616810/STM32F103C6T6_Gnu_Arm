@@ -92,6 +92,10 @@ CSRC =	\
 		lib/u8g2/csrc/u8x8_u8toa.c \
 		lib/u8g2/csrc/u8x8_u16toa.c \
 		lib/mpu6050/mpu6050.c \
+		lib/mpu6050/inv_mpu_dmp_motion_driver.c \
+		lib/mpu6050/inv_mpu.c \
+		lib/mpu6050/mpu6050_dmp.c \
+
 
 
 

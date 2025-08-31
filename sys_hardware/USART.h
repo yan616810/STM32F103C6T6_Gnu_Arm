@@ -4,7 +4,7 @@
 
 
 //选择使用哪个USART,usart1和usart2所挂载的总线不同
-#define usartx     2     //1表示开启usart1   2表示开启usart2
+#define usartx     1     //1表示开启usart1   2表示开启usart2
 
 //接收缓存区大小(x-1个字节)
 #define usart_rx_buff_size 32

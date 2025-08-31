@@ -23,7 +23,8 @@
         "oled.h": "c",
         "hw_iic.h": "c",
         "mpu6050.h": "c",
-        "inv_mpu_dmp_motion_driver.h": "c"
+        "inv_mpu_dmp_motion_driver.h": "c",
+        "mpu6050_dmp.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }

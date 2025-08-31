@@ -85,7 +85,7 @@ void * _sbrk (ptrdiff_t incr)
 int _write(int fd, const void *ptr, size_t len) {
     if (fd == STDOUT_FILENO || fd == STDERR_FILENO) { // stdout=1, stderr=2
         const char *buf = (const char *)ptr;
-        usart2_send_Hex((uint8_t *)buf, len);
+        usart1_send_Hex((uint8_t *)buf, len);
         // for (size_t i = 0; i < len; i++) {
         //     usart2_send_Char(buf[i]); // 你的 UART 发送函数
         // }
