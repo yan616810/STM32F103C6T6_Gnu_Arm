@@ -79,28 +79,28 @@
 /*mpu6050*/
 #include "mpu6050_dmp.h"
 // // #include "inv_mpu.h"
-// #include "mpu6050.h"
+#include "mpu6050.h"
 
-// /*flash W25q128*/
+/*flash W25q128*/
 // #include "w25q128.h"
 // #include "driver_w25qxx_basic.h"
 
-// /*环形缓冲区*/
+/*环形缓冲区*/
 // #include "ringbuff.h"
-// #include "lwrb.h"
+#include "lwrb.h"
 
-// /*DMA + USART1 + LWRB + LWGPS*/
-// #include "DMA.h"
-// #include "lwgps.h"
+/*DMA + USART1 + LWRB + LWGPS*/
+#include "DMA_USART.h"
+#include "lwgps.h"
 
-// //LCD
+//LCD
 // #include "LCD.h"
 
 
 // //DMP库，fifo容量有限，尝试最佳时间，避免溢出或读取过快
 #define dmp_get_fifo  10//10ms读一次mpu6050 fifo
 
-// volatile uint16_t second_cnt=1000;
+volatile uint16_t second_cnt=1000;
 volatile uint8_t key_cnt=10;
 volatile uint8_t ms_cnt=100;
 volatile uint8_t mpu6050_dmp_cnt=dmp_get_fifo;
@@ -117,30 +117,29 @@ char u8g2_buf[18];
 // //编码器
 // int16_t encoder_value;
 /*mpu6050 DMP库模式传输至匿名上位机*/
-int dmp_result;
-float pitch,roll,yaw;
-char niming[13]={0xaa,0xff,0x03,7,};
-int16_t roll_temp;
-int16_t pitch_temp;
-int16_t yaw_temp;
-uint8_t sumcheck; 
-uint8_t addcheck; 
+// int dmp_result;
+// float pitch,roll,yaw;
+// char niming[13]={0xaa,0xff,0x03,7,};
+// int16_t roll_temp;
+// int16_t pitch_temp;
+// int16_t yaw_temp;
+// uint8_t sumcheck; 
+// uint8_t addcheck; 
 /*mpu6050不使用DMP库*/
-int mpu6050_init_result=1;//1表示初始化失败
-short gx,gy,gz,ax,ay,az,temperature;
+// int mpu6050_init_result=1;//1表示初始化失败
+// short gx,gy,gz,ax,ay,az,temperature;
 // //flash
 // uint8_t flash_buf[1024];
-// //自写ringbuff.c创建一个环形缓冲区句柄rb_1
+/*自写ringbuff.c创建一个环形缓冲区句柄rb_1*/
 // RING_BUF_DEF(rb_1,10);
-// //LWRB
-// lwrb_t buff_1;
-// uint8_t buffdata_1[1024];//大于等于DMA缓冲区4倍
+/*LWRB*/
+lwrb_t buff_1;
+uint8_t buffdata_1[1024];//大于等于DMA缓冲区4倍
 // //LWGPS
-// lwgps_t lwgps_handle;
-// // lwgps_float_t latitude, longitude, altitude;
+lwgps_t lwgps_handle;
 
-// /************************tamp var************************ */
-// uint8_t earth_flag=1;//全球缩略图标志位
+/************************tamp var************************ */
+uint8_t earth_flag=0;//全球缩略图标志位
 
 // void timer1_init(void)
 // {
@@ -200,7 +199,7 @@ void TIM2_IRQHandler(void)//1ms
 {
 	if(TIM_GetITStatus(TIM2,TIM_IT_Update) == SET)
 	{
-		// if(second_cnt<1000)second_cnt++;
+		if(second_cnt<1000)second_cnt++;
 		if(ms_cnt<100)ms_cnt++;
 		if(key_cnt<10)key_cnt++;
 		if(mpu6050_dmp_cnt<dmp_get_fifo)mpu6050_dmp_cnt++;
@@ -260,12 +259,7 @@ void key_task()
 		// static uint8_t data='b';
 		// rb_write(&rb_1,data++);
 	//2025/6/25 gps earth QGIS
-		// earth_flag=(earth_flag==0)?1:0;
-		// if(earth_flag == 1)
-		// {
-		// 	u8g2_oled_draw_earth(&u8g2);
-		// 	u8g2_SendBuffer(&u8g2);
-		// }
+		earth_flag=(earth_flag==0)?1:0;
 	}
 	else if (key_value==2)//单击B12
 	{
@@ -277,82 +271,85 @@ void key_task()
 	}
 }
 
-// void gps_task(void)
-// {
-// 	uint8_t temp_buf[128];//建议temp_buf大小与DMA缓冲区一致
-//     size_t len;
-
-//     // 尝试从环形缓冲区读取数据
-//     while ((len = lwrb_read(&buff_1, temp_buf, sizeof(temp_buf))) > 0) {
-//         // 送入LWGPS解析
-//         lwgps_process(&lwgps_handle, temp_buf, len);//lwgps_process()本身是流式解析，处理速度很快。
-//     }
-// }
+void gps_task(void)
+{
+	uint8_t temp_buf[128];//建议temp_buf大小与DMA缓冲区一致
+    size_t len;
+// 
+    // 尝试从环形缓冲区读取数据
+    while ((len = lwrb_read(&buff_1, temp_buf, sizeof(temp_buf))) > 0) {
+        // 送入LWGPS解析
+        lwgps_process(&lwgps_handle, temp_buf, len);//lwgps_process()本身是流式解析，处理速度很快。
+    }
+}
 
 void task_proc(void)
 {
-	// /*LWGPS解析DMA.c接收到缓冲区中的数据*/
-	// gps_task();
+	/*LWGPS解析DMA.c接收到缓冲区中的数据*/
+	gps_task();
+	if(second_cnt == 1000)//1s
+	{
+		second_cnt=0;
+		if (lwgps_handle.is_valid) 
+		{
+			if(earth_flag == 0)//earth_flag==1时代表以全球缩略图的形式显示实时坐标
+			{
+				GPIOC->ODR ^= GPIO_Pin_13;
+				// printf("[--YLAD--]\r\n");
 
-	// if(second_cnt == 1000)//1s
-	// {
-	// 	second_cnt=0;
-	// 	if (lwgps_handle.is_valid) 
-	// 	{
-	// 		if(earth_flag == 0)//earth_flag==1时代表以全球缩略图的形式显示实时坐标
-	// 		{
-	// 			// printf("[--YLAD--]\r\n");
+				// 可选：解析结果输出
+    			// if (lwgps_handle.is_valid) {
+    			    // printf("Lat: %.6f, Lon: %.6f, Alt: %.4f\r\n",
+    			    //     latitude, longitude, altitude);
+    			// }
+					u8g2_ClearBuffer(&u8g2);
+				memset(u8g2_buf, 0, sizeof(u8g2_buf));
+				// sprintf(u8g2_buf,"[>Lon:%03.7f<]",lwgps_handle.latitude);
+				sprintf(u8g2_buf,"[>Lat:%+05d<]",(int)lwgps_handle.latitude);
+				u8g2_SetDrawColor(&u8g2,0);
+				u8g2_DrawBox(&u8g2,0*7,2*10,18*7,10);
+				u8g2_SetDrawColor(&u8g2,1);
+				u8g2_DrawStr(&u8g2,0*7,2*10,u8g2_buf);
 
-	// 			// 可选：解析结果输出
-    // 			// if (lwgps_handle.is_valid) {
-    // 			    // printf("Lat: %.6f, Lon: %.6f, Alt: %.4f\r\n",
-    // 			    //     latitude, longitude, altitude);
-    // 			// }
-	// 				u8g2_ClearBuffer(&u8g2);
-	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
-	// 			sprintf(u8g2_buf,"[>Lat:%03.7f<]",lwgps_handle.latitude);
-	// 			u8g2_SetDrawColor(&u8g2,0);
-	// 			u8g2_DrawBox(&u8g2,0*7,2*10,18*7,10);
-	// 			u8g2_SetDrawColor(&u8g2,1);
-	// 			u8g2_DrawStr(&u8g2,0*7,2*10,u8g2_buf);
+				memset(u8g2_buf, 0, sizeof(u8g2_buf));
+				// sprintf(u8g2_buf,"[>Lon:%03.7f<]",lwgps_handle.longitude);
+				sprintf(u8g2_buf,"[>Lon:%+05d<]",(int)lwgps_handle.longitude);
+				u8g2_SetDrawColor(&u8g2,0);
+				u8g2_DrawBox(&u8g2,0*7,3*10,18*7,10);
+				u8g2_SetDrawColor(&u8g2,1);
+				u8g2_DrawStr(&u8g2,0*7,3*10,u8g2_buf);
 
-	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
-	// 			sprintf(u8g2_buf,"[>Lon:%03.7f<]",lwgps_handle.longitude);
-	// 			u8g2_SetDrawColor(&u8g2,0);
-	// 			u8g2_DrawBox(&u8g2,0*7,3*10,18*7,10);
-	// 			u8g2_SetDrawColor(&u8g2,1);
-	// 			u8g2_DrawStr(&u8g2,0*7,3*10,u8g2_buf);
+				memset(u8g2_buf, 0, sizeof(u8g2_buf));
+				// sprintf(u8g2_buf,"[>Alt:%03.5f<]", lwgps_handle.altitude);
+				sprintf(u8g2_buf,"[>Alt:%+05d<]",(int)lwgps_handle.altitude);
+				u8g2_SetDrawColor(&u8g2,0);
+				u8g2_DrawBox(&u8g2,0*7,4*10,18*7,10);
+				u8g2_SetDrawColor(&u8g2,1);
+				u8g2_DrawStr(&u8g2,0*7,4*10,u8g2_buf);
 
-	// 			memset(u8g2_buf, 0, sizeof(u8g2_buf));
-	// 			sprintf(u8g2_buf,"[>Alt:%03.5f<]", lwgps_handle.altitude);
-	// 			u8g2_SetDrawColor(&u8g2,0);
-	// 			u8g2_DrawBox(&u8g2,0*7,4*10,18*7,10);
-	// 			u8g2_SetDrawColor(&u8g2,1);
-	// 			u8g2_DrawStr(&u8g2,0*7,4*10,u8g2_buf);
-
-	// 			u8g2_SendBuffer(&u8g2);
-	// 		}
-	// 		else{
-	// 			//全球缩略图
-	// 			u8g2_ClearBuffer(&u8g2);
-	// 			u8g2_oled_draw_earth(&u8g2);//在全幅缓冲区内绘制全球缩略图
-	// 			u8g2_oled_draw_earth_pixel_VHxvLine(&u8g2,lwgps_handle.latitude,lwgps_handle.longitude);//在全球缩略图上绘制实时经纬度坐标点
-	// 			u8g2_SendBuffer(&u8g2);
-	// 		}
+				u8g2_SendBuffer(&u8g2);
+			}
+			else{
+				//全球缩略图
+				u8g2_ClearBuffer(&u8g2);
+				u8g2_oled_draw_earth(&u8g2);//在全幅缓冲区内绘制全球缩略图
+				u8g2_oled_draw_earth_pixel_VHxvLine(&u8g2,lwgps_handle.latitude,lwgps_handle.longitude);//在全球缩略图上绘制实时经纬度坐标点
+				u8g2_SendBuffer(&u8g2);
+			}
 				
-	// 	}
-	// 	else
-	// 	{
-	// 		// u8g2_ClearBuffer(&u8g2);
-	// 		memset(u8g2_buf, 0, sizeof(u8g2_buf));
-	// 		sprintf(u8g2_buf,"[>GPS No Data<]");
-	// 		u8g2_SetDrawColor(&u8g2,1);
-	// 		u8g2_DrawBox(&u8g2,3*7,27,13*7,15);
-	// 		u8g2_SetDrawColor(&u8g2,0);
-	// 		u8g2_DrawStr(&u8g2,3*7,3*10,u8g2_buf);
-	// 		u8g2_SendBuffer(&u8g2);
-	// 	}
-	// }
+		}
+		else
+		{
+			// u8g2_ClearBuffer(&u8g2);
+			memset(u8g2_buf, 0, sizeof(u8g2_buf));
+			sprintf(u8g2_buf,"[>GPS No Data<]");
+			u8g2_SetDrawColor(&u8g2,1);
+			u8g2_DrawBox(&u8g2,3*7,27,13*7,15);
+			u8g2_SetDrawColor(&u8g2,0);
+			u8g2_DrawStr(&u8g2,3*7,3*10,u8g2_buf);
+			u8g2_SendBuffer(&u8g2);
+		}
+	}
 	if(key_cnt==10)//10ms
 	{
 		key_cnt=0;
@@ -474,33 +471,33 @@ void task_proc(void)
 	{
 		mpu6050_dmp_cnt=0;
 	/*MPU6050中DMP数据*/
-		if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
-    	// else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
-		else{
-			roll_temp = roll*100;
-			pitch_temp = pitch*100;
-			yaw_temp = yaw*100;
-			sumcheck = 0; 
-			addcheck = 0; 
-			niming[4]=(uint8_t)(pitch_temp);
-			niming[5]=(uint8_t)(pitch_temp>>8);
-			niming[6]=(uint8_t)(roll_temp);
-			niming[7]=(uint8_t)(roll_temp>>8);
-			niming[8]=(uint8_t)(yaw_temp);
-			niming[9]=(uint8_t)(yaw_temp>>8);
-			niming[10]=0x01;
-			for(uint8_t i=0; i < (niming[3]+4); i++) 
-			{ 
-				sumcheck += niming[i];
-				addcheck += sumcheck;  
-			}
-			niming[11]=sumcheck;
-			niming[12]=addcheck;
-			for(uint8_t i=0;i<13;i++)
-			{
-				usart1_send_Char(niming[i]);
-			}
-		}
+		// if(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0){/*printf("error\r\n");*/}//返回值:0,DMP成功解出欧拉角   
+    	// // else printf("pitch->%f\troll->%f\tyaw->%f\r\n",pitch,roll,yaw);
+		// else{
+		// 	roll_temp = roll*100;
+		// 	pitch_temp = pitch*100;
+		// 	yaw_temp = yaw*100;
+		// 	sumcheck = 0; 
+		// 	addcheck = 0; 
+		// 	niming[4]=(uint8_t)(pitch_temp);
+		// 	niming[5]=(uint8_t)(pitch_temp>>8);
+		// 	niming[6]=(uint8_t)(roll_temp);
+		// 	niming[7]=(uint8_t)(roll_temp>>8);
+		// 	niming[8]=(uint8_t)(yaw_temp);
+		// 	niming[9]=(uint8_t)(yaw_temp>>8);
+		// 	niming[10]=0x01;
+		// 	for(uint8_t i=0; i < (niming[3]+4); i++) 
+		// 	{ 
+		// 		sumcheck += niming[i];
+		// 		addcheck += sumcheck;  
+		// 	}
+		// 	niming[11]=sumcheck;
+		// 	niming[12]=addcheck;
+		// 	for(uint8_t i=0;i<13;i++)
+		// 	{
+		// 		usart2_send_Char(niming[i]);
+		// 	}
+		// }
 	//RTC实时时钟
 		// RTC_get_DataStruct(&RTC_read_RTCStruct,&RTC_Init_And_Adjustment);
 	//编码器
@@ -525,7 +522,7 @@ int main(void)
 /*按键初始化*/
 	key_init();
 /*串口初始化*/
-	usart1_init();
+	usart2_init();
 /*IIC协议端口初始化 && 以极低的协议速度搜索iic设备并通过串口打印地址信息*/
 	IIC_InitPins_or_ChangePins(RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_8,RCC_APB2Periph_GPIOB,GPIOB,GPIO_Pin_9);
 	IIC_Set_speed(10);//防止iic协议速度过快，搜索不到低速设备
@@ -536,13 +533,13 @@ int main(void)
 	// OLED_Init();
 	// oled_image_binbin();
 /*u8g2单色屏初始化*/
-	// u8g2_oled_init(&u8g2);
-	// // u8g2_oled_play_Animation(&u8g2);
-	// u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
-	// u8g2_SetFontPosTop(&u8g2);
-	// u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
-	// u8g2_SetDrawColor(&u8g2,1);
-	// u8g2_ClearDisplay(&u8g2);
+	u8g2_oled_init(&u8g2);
+	// u8g2_oled_play_Animation(&u8g2);
+	u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
+	u8g2_SetFontPosTop(&u8g2);
+	u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
+	u8g2_SetDrawColor(&u8g2,1);
+	u8g2_ClearDisplay(&u8g2);
 
 	// u8g2_DrawStr(&u8g2,0,0*10,"X=");
 	// u8g2_DrawStr(&u8g2,0,1*10,"Y=");
@@ -638,14 +635,14 @@ int main(void)
 	// 	while(1);
 	// }
 /*mpu6050 dmp初始化*/
-	dmp_result = MPU6050_Init_UseDmp();
-	if(dmp_result != 0)
-	{//有错误
-		printf("DMP Init error->%d\r\n",dmp_result);
-		Delay_ms(500);//在获取fifo数据时，若获取失败，不要延时，避免fifo溢出
-	}else{
-		printf("DMP Init Success!\r\n");
-	}
+	// dmp_result = MPU6050_Init_UseDmp();
+	// if(dmp_result != 0)
+	// {//有错误
+	// 	printf("DMP Init error->%d\r\n",dmp_result);
+	// 	Delay_ms(500);//在获取fifo数据时，若获取失败，不要延时，避免fifo溢出
+	// }else{
+	// 	printf("DMP Init Success!\r\n");
+	// }
 //OV7670
 
 //W25Q128 Flash
@@ -700,12 +697,6 @@ int main(void)
 	// sprintf(u8g2_buf,"Flash DID:0x%x",DID);
 	// u8g2_DrawStr(&u8g2,0*7,1*10,u8g2_buf);
 	// u8g2_SendBuffer(&u8g2);
-//LWGPS
-	// lwrb_init(&buff_1, buffdata_1,sizeof(buffdata_1));  //初始化DMA双缓冲使用到的环形缓冲区
-	// DMA_link_lwrb_t(&buff_1);                            //链接外部定义的环形缓冲区,供DMA.c使用
-	// DMA_usart1_to_arrybuffer_init();                     //配置usart1 + 使用DMA1的通道5，通过双缓冲机制
-	// /*执行到这里是DMA已经可以自动从usart1接收数据并自动拷贝到LWRB的环形缓冲区中*/
-	// printf("DMA usart1 to lwrb init success!\r\n");
 
 //ringbuff 写
 	// rb_write(&rb_1,'a');
@@ -726,6 +717,15 @@ int main(void)
 	// printf("Number of bytes read: %d\r\n", (int)len);
 	// usart2_send_Hex(data,len);
 	// printf("\r\n");
+
+/*LWGPS*/
+	lwgps_init(&lwgps_handle);//GPS报文解析器句柄初始化
+	lwrb_init(&buff_1, buffdata_1,sizeof(buffdata_1));  //初始化DMA双缓冲使用到的环形缓冲区
+	DMA_link_lwrb_t(&buff_1);                            //链接外部定义的环形缓冲区,供DMA_USART.c使用
+	DMA_usart1_to_arrybuffer_init();                     //配置usart1 + 使用DMA1的通道5，通过双缓冲机制
+	/*执行到这里是DMA已经可以自动从usart1接收数据并自动拷贝到LWRB的环形缓冲区中*/
+	printf("DMA usart1 to lwrb init success!\r\n");
+
 /*任务滴答*/
 	timer2_init();
 	printf("system init success!!!\r\n");

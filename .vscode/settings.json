@@ -24,7 +24,9 @@
         "hw_iic.h": "c",
         "mpu6050.h": "c",
         "inv_mpu_dmp_motion_driver.h": "c",
-        "mpu6050_dmp.h": "c"
+        "mpu6050_dmp.h": "c",
+        "dma_usart.h": "c",
+        "math.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }

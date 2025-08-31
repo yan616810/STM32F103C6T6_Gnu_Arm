@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 // #include "BKP.h"
-// #include "DMA.h"
+#include "DMA_USART.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -76,6 +76,11 @@ void NMI_Handler(void)
 //        RCC_HSEConfig(RCC_HSE_OFF);
 //        RCC_PLLCmd(DISABLE);
 //    }
+  while (1)
+  {
+    /* code */
+  }
+  
 }
 
 /**
@@ -208,17 +213,17 @@ void SysTick_Handler(void)
 //   }
 // }
 
-// void USART1_IRQHandler(void)
-// {
-//   // printf("USART1_IRQHandler\r\n");//调试时使用
-//   USART1_IRQHandler_IDLE_callback(); // 处理USART1空闲中断
-// }
+void USART1_IRQHandler(void)
+{
+  // printf("USART1_IRQHandler\r\n");//调试时使用
+  USART1_IRQHandler_IDLE_callback(); // 处理USART1空闲中断
+}
 
-// void DMA1_Channel5_IRQHandler(void)
-// {
-//   // printf("DMA1_Channel5_IRQHandler\r\n");//调试时使用
-//   DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(); // 处理DMA1通道5接收满中断
-// }
+void DMA1_CH5_IRQHandler(void)
+{
+  // printf("DMA1_Channel5_IRQHandler\r\n");//调试时使用
+  DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(); // 处理DMA1通道5接收满中断
+}
 
 /**
   * @}

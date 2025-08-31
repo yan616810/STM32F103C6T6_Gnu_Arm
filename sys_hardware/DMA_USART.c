@@ -1,5 +1,5 @@
 /**
- * @file DMA.c
+ * @file DMA_USART.c
  * @author your name (you@domain.com)
  * @brief DMA双缓冲机制实现无缝接收串口数据并拷贝到LWRB环形缓冲区中 DMA+USART1+LWRB
  * 1.先在外部，如主程序中初始化一个LWRB环形缓冲区;
@@ -13,7 +13,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
-#include "DMA.h"
+#include "DMA_USART.h"
+#include "stm32f10x.h"
 #include "lwrb.h"
 
 /*定义双缓冲区*/
@@ -143,10 +144,10 @@ void DMA1_Channel5_IRQHandler_usart1_rxFULL_callback(void)
         DMA1_Channel5->CNDTR = (uint16_t)DMA_BUF_SIZE;          // 重新设置传输数据量
         DMA1_Channel5->CCR |= DMA_CCR5_EN;                     //开启DMA传输
 
-        DMA_ClearITPendingBit(DMA1_IT_TC5);
-
         //将full_buf指向的填满数据的dma_bufx拷贝到LWRB环形缓冲区
         lwrb_write(static_rb_buff,full_buf,DMA_BUF_SIZE);
+        
+        DMA_ClearITPendingBit(DMA1_IT_TC5);
     }
 }
 
