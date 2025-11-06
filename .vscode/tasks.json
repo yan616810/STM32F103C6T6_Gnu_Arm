@@ -1,6 +1,6 @@
 /*
 1.与调试器集成：
-            如果你需要调试编译后的程序，可以配置 launch.json 来配合 tasks.json，例如指定 preLaunchTask 为 "Build with mingw32-make"，确保调试前自动编译。
+            如果你需要调试编译后的程序，可以配置 launch.json 来配合 tasks.json，例如指定 preLaunchTask 为 "Build with make"，确保调试前自动编译。
 
 */
 {
@@ -9,7 +9,7 @@
         {
             "label": "Flash with OpenOCD",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "make",
             "args": [
                 "flash"
             ],
@@ -23,12 +23,12 @@
             "detail": "使用 OpenOCD 刷写程序到 STM32F1 芯片-Run openocd to flash the program to STM32F1 chip."
         },
         {
-            "label": "Rebuild with mingw32-make",
+            "label": "Rebuild with make",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "bash",
             "args": [
-                "clean",
-                "all"
+                "-c",
+                "make clean && make -j4"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -40,14 +40,14 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "完全重新构建整个工程-Run mingw32-make clean all to rebuild the project."
+            "detail": "完全重新构建整个工程-Run make clean all to rebuild the project."
         },
         {
-            "label": "Build with mingw32-make",
+            "label": "Build with make",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "make",
             "args": [
-                "-j20"
+                "-j4"   //避免把多个参数放在一个字符串里，所以不用写成-j4 all，而是直接写成一个字符串默认执行all
             ],
             "options": {
                 "cwd": "${workspaceFolder}" //指明命令在终端的哪个目录执行
@@ -59,12 +59,12 @@
                 "kind": "build",
                 "isDefault": false // 该任务不是默认构建任务
             },
-            "detail": "构建整个工程-Run mingw32-make to build the project based on Makefile."
+            "detail": "构建整个工程-Run make to build the project based on Makefile."
         },
         {
-            "label": "Clean with mingw32-make",
+            "label": "Clean with make",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "make",
             "args": [
                 "clean"
             ],
@@ -78,12 +78,12 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "删除.obj目录文件-Run mingw32-make clean to remove generated files."
+            "detail": "删除.obj目录文件-Run make clean to remove generated files."
         },
         {
-            "label": "Help with mingw32-make",
+            "label": "Help with make",
             "type": "shell",
-            "command": "mingw32-make",
+            "command": "make",
             "args": [
                 "help"
             ],
@@ -97,7 +97,7 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "列出所有make目标-mingw32-make help to display help information."
+            "detail": "列出所有make目标-make help to display help information."
         }
     ]
 }

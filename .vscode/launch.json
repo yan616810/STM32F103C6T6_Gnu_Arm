@@ -21,7 +21,7 @@
         /*以下配置用于开启openocd服务器在localhost:3333*/
             "servertype"        : "openocd",                //使用 OpenOCD 作为 GDB-Server
             "searchDir"         : [//指定 OpenOCD 配置文件搜索路径
-                "D:\\gnu-arm\\xpack-openocd-0.12.0-6-win32-x64\\xpack-openocd-0.12.0-6\\openocd\\scripts\\"
+                "/usr/share/openocd/scripts/"
             ],
             "configFiles"       : [//指定 OpenOCD 配置文件
                 "interface/cmsis-dap.cfg",                  // 调试接口配置文件，例如 ST-Link,cmsis-dap
@@ -36,7 +36,7 @@
             // ],
 /****************************GDB***********************************************/
         /*GDB连接到OpenOCD服务器配置*/
-            "gdbPath": "D:\\gnu-arm\\arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi\\bin\\arm-none-eabi-gdb.exe", // GDB 可执行文件路径
+            "gdbPath": "/home/ylad/tools/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gdb", // GDB 可执行文件路径
             "gdbTarget": "127.0.0.1:50000",                  //连接到在本地运行的openocd服务器50000端口
         /*下面三个配置都是直接传给gdb的(但是gdb使用monitor可以间接传给openocd)，作用详见：https://github.com/Marus/cortex-debug/wiki/Cortex-Debug-Under-the-hood*/
             "preLaunchCommands": [//一组用户定义的命令，应该在gdb连接到gdb服务器之前使用，传给arm-none-eabi-gdb.exe
