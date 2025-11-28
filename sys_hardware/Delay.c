@@ -8,7 +8,7 @@
 void Delay_us(uint32_t xus)
 {
 	SysTick->LOAD = 72 * xus;				//设置定时器重装值
-	SysTick->VAL = 0x00;					//清空当前计数值，写入任何值都会将该域清零，同时也会将STK_CTRL寄存器中的COUNTFLAG位清零
+	SysTick->VAL = 0x00;					//清空当前计数值，写入任何值都会将该域清零，同时也会将STK_CTRL寄存器中的COUNTFLAG位清零(表示VAL还没递减到0)
 	SysTick->CTRL = 0x00000005;				//设置时钟源为HCLK，启动定时器
 	while(!(SysTick->CTRL & 0x00010000));	//等待计数到0
 	SysTick->CTRL = 0x00000004;				//关闭定时器
