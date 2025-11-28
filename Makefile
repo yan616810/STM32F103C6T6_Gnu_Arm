@@ -1,4 +1,6 @@
-# 1.Windows 下输出空行的正确方法echo.
+# 1.发布时建议注释掉177行的生成单文件源码与汇编对照文件.lst，以加快编译速度并减少磁盘空间占用
+# 2.第273行，连接器用不到编译器参数，即用不到$(ALL_CFLAGS)，只需要将$(ALL_CFLAGS)替换成-mcpu=$(CPU) $(THUMBIW)即可
+# 3.Windows 下输出空行的正确方法echo.
 
 ### Project name (also used for output file name)
 PROJECT	= ylad_gps_oled
@@ -19,8 +21,16 @@ LINKSCRIPT = STM32F103C6T6.ld
 ### Object output directory
 OBJDIR = obj
 
+### Warning controls
+WARNINGS = all extra unused # error
+
+### Output file type (hex, bin or both) and debugger type
+OUTPUT	= hex
+DEBUG	= dwarf-4 #dwarf-2 #dwarf-3
+ASM_DEBUG = dwarf-2 #兼容性更好一些
+
 # Default target.
-all: version build size #在终端只执行make时，默认执行version build size
+all: version build size#在终端只执行make时，默认执行version build size；不要加 clean，破坏增量构建并影响并行-j
 
 
 ### Include dirs, library dirs and definitions
@@ -118,15 +128,6 @@ ASRCARM	=
 vpath %.c $(sort $(dir $(CSRC)))#提取目录，sort去重
 
 
-### Warning controls
-WARNINGS = all extra unused # error
-
-### Output file type (hex, bin or both) and debugger type
-OUTPUT	= hex
-HEXFMT  = ihex
-DEBUG	= dwarf-2#dwarf-3 #dwarf-4 
-
-
 ### Programs to build porject
 CC      = arm-none-eabi-gcc
 OBJCOPY = arm-none-eabi-objcopy
@@ -150,8 +151,8 @@ PROJECT_dir   := $(OBJDIR)/$(PROJECT)
 
 ### Compiler flags
 ifeq ($(THUMB),YES)
-THUMBFLAG = -mthumb
-THUMBIW = -mthumb-interwork
+THUMBFLAG = -mthumb #指示编译器生成 Thumb 指令集的代码
+THUMBIW = -mthumb-interwork #允许 ARM 和 Thumb 代码之间的相互调用
 else
 THUMBFLAG =
 THUMBIW =
@@ -160,33 +161,40 @@ endif
 
 # Flags for C files
 CFLAGS += -std=$(CSTD)
-CFLAGS += -g -g$(DEBUG)
+CFLAGS += -g$(DEBUG)
 CFLAGS += -O$(OPTIMIZE)
 CFLAGS += $(addprefix -W,$(WARNINGS))
 CFLAGS += $(addprefix -I,$(INCDIRS))
 CFLAGS += $(addprefix -D,$(DEFS))
-CFLAGS += -Wp,-MM,-MP,-MT,$(OBJDIR)/$(*F).o,-MF,$(OBJDIR)/$(*F).d#-Wp:表示将后面的选项传递给预处理器 -MM:生成依赖关系 -MP:生成伪目标 -MT:指定目标文件 -MF:指定依赖文件的名称
 # CFLAGS += -fno-diagnostics-color #禁止错误有颜色
 CFLAGS += -fdiagnostics-color=always #始终使用错误颜色
+##将每个函数或数据放在单独的节中，以便链接器通过参数-wl,-gc-section可以删除未使用的函数或数据，从而减小最终可执行文件的大小
 CFLAGS += -ffunction-sections -fdata-sections
-CFLAGS += -Wa,-a,-ad,-alms=$(OBJDIR)/$(notdir $(<:.c=.lst))#查看单文件源码与汇编对应
-#gnu arm默认禁止宽字符，从而确保 printf 输出中文字符时以单字节形式（例如 UTF-8 或 GBK 编码的原始字节）发送到串口，而不是被解析为多字节字符。
-
+##生成依赖文件，用于自动管理头文件依赖关系，方便增量编译，根据时间戳只重新编译修改过的文件及其依赖文件
+CFLAGS += -Wp,-MM,-MP,-MT,$(OBJDIR)/$(*F).o,-MF,$(OBJDIR)/$(*F).d#-Wp:表示将后面的选项传递给预处理器 -MM:生成依赖关系 -MP:生成伪目标 -MT:指定目标文件 -MF:指定依赖文件的名称
+##发布阶段（建议直接注释下面-Wa参数，禁用汇编器生成单文件源码与汇编对照文件.lst）
+# CFLAGS += -Wa,-a,-ad,-alms=$(OBJDIR)/$(notdir $(<:.c=.lst))#-Wa:表示将后面的选项传递给汇编器 查看单文件源码与汇编对应
+CFLAGS += -Wa,-ahls=$(OBJDIR)/$(notdir $(<:.c=.lst)) #h=C代码, l=汇编指令, m=将宏展开, s=符号表
+##gnu arm默认禁止宽字符，从而确保 printf 输出中文字符时以单字节形式（例如 UTF-8 或 GBK 编码的原始字节）发送到串口，而不是被解析为多字节字符。
+##vscode 里面的串口解析插件有bug，不能设置接收时间间隔，而导致中文字符乱码，使用vofa+设置接收时间间隔可以正确显示中文字符
 
 # Assembler flags
-ASFLAGS += $(addprefix -D,$(ADEFS)) -Wa,-g -g$(DEBUG)
+ASFLAGS += $(addprefix -D,$(ADEFS)) -g$(ASM_DEBUG)
 ASFLAGS += -ffunction-sections -fdata-sections
 
 
 # Linker flags
+##GCC 前端选项：直接传递（-specs, -T, -L, -l, -nostartfiles）
+LDFLAGS += -T$(LINKSCRIPT)		# 1. 指定链接脚本
 # LDFLAGS += -nostartfiles -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections #-nostartfiles 是 GCC 前端选项，不在 binutils/ld 手册中
-LDFLAGS += -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections
-# LDFLAGS += -lc 
+# LDFLAGS += -nostartfiles        # 2. GCC前端选项，不使用标准启动文件,但是堆标准库函数化代码都在nano库中，因此必须注释掉此行
+# LDFLAGS += -lc 				# 3. 规格文件
 LDFLAGS += -specs=nano.specs # 使用类似微库的newlib-nano库
 # LDFLAGS += -lc_nano 你只需要选择 -specs=nano.specs 或 -lc_nano 其中之一即可指明使用的nano库;
-LDFLAGS += $(patsubst %,-L%,$(LIBDIRS)) $(patsubst %,-l%,$(LIBS))
 LDFLAGS += $(MATHLIB)
-LDFLAGS += -T$(LINKSCRIPT)
+LDFLAGS += $(patsubst %,-L%,$(LIBDIRS)) $(patsubst %,-l%,$(LIBS))
+##链接器选项：通过 -Wl,option传递（--gc-sections, -Map, --cref）
+LDFLAGS += -Wl,-Map=$(PROJECT_dir).map,--cref,--gc-sections#-Wl:将后面逗号分隔的选项传递给链接器
 
 
 # Combine all necessary flags and optional flags.
@@ -236,72 +244,86 @@ sym: $(PROJECT_dir).sym
 
 # Create final output file (.hex or .bin) from ELF output file.
 %.hex: %.elf | $(OBJDIR)
-	@echo.
-	$(OBJCOPY) -O $(HEXFMT) $< $@
+# 	@echo.
+	@echo
+	$(OBJCOPY) -O ihex $< $@
 
 %.bin: %.elf | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	$(OBJCOPY) -O binary $< $@
 
 # Create extended listing file from ELF output file.
 %.lst: %.elf | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	$(OBJDUMP) -h -S -C $< > $@
 
 # Create a symbol table from ELF output file.
 %.sym: %.elf | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	$(NM) -n $< > $@
 
 # Link: create ELF output file from object files.
 %.elf:  $(AOBJARM_dir) $(AOBJ_dir) $(COBJARM_dir) $(COBJ_dir) | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	@echo Linking...
-	$(CC) $(THUMBFLAG) $(ALL_CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(THUMBFLAG) -mcpu=$(CPU) $(THUMBIW) $^ -o $@ $(LDFLAGS)
 
 # Compile: create object files from C source files. ARM or Thumb(-2)
 $(COBJ_dir) : $(OBJDIR)/%.o : %.c | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	@echo $< :
 	$(CC) -c $(THUMBFLAG) $(ALL_CFLAGS) $< -o $@
 
 # Compile: create object files from C source files. ARM-only
 $(COBJARM_dir) : $(OBJDIR)/%.o : %.c | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	@echo $< :
 	$(CC) -c $(ALL_CFLAGS) $< -o $@ 
 
 # Assemble: create object files from assembler source files. ARM or Thumb(-2)
 $(AOBJ_dir) : $(OBJDIR)/%.o : %.S | $(OBJDIR)
-	@echo.		
+# 	@echo.
+	@echo
 	@echo $< :
 	$(CC) -c $(THUMBFLAG) $(ALL_ASFLAGS) $< -o $@
 
 # Assemble: create object files from assembler source files. ARM-only
 $(AOBJARM_dir) : $(OBJDIR)/%.o : %.S | $(OBJDIR)
-	@echo.
+# 	@echo.
+	@echo
 	@echo $< :
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
 # Target: clean project.
 clean:
-	@echo.
-	rmdir /S /Q $(OBJDIR) | exit 0
-# 	rm -f -r $(OBJDIR) | exit 0 #等效于-rm -f -r $(OBJDIR)
+# 	@echo.
+	@echo
+	@echo Cleaning project...
+# 	rmdir /S /Q $(OBJDIR) | exit 0
+	rm -f -r $(OBJDIR) | exit 0 
+# 	等效于-rm -f -r $(OBJDIR)
 
 
 # Include the dependency files.
-# 确保目录存在的目标
+# # 确保目录存在的目标
+# $(OBJDIR):
+# 	@if not exist $(OBJDIR) mkdir $(OBJDIR)
 $(OBJDIR):
-	@if not exist $(OBJDIR) mkdir $(OBJDIR)
+	@mkdir -p $(OBJDIR)
 # 包含依赖文件
 -include $(wildcard $(OBJDIR)/*.d)
 
 
 ### help
 help : 
-	@echo ***********************************************
+	@echo "***********************************************"
 	@echo Available targets:
 	@echo   all       - Build all targets
 	@echo   clean     - Remove all generated files
@@ -313,7 +335,7 @@ help :
 	@echo   lst       - Generate listing file
 	@echo   sym       - Generate symbol file
 	@echo   flash     - Flash the program to the device
-	@echo ***********************************************
+	@echo '***********************************************'
 	@echo *************all .c file with dir**************
 	@echo $(CSRC)
 	@echo ****************all .c file********************

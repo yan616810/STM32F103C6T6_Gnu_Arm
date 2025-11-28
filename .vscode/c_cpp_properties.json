@@ -9,10 +9,10 @@
                 // "STM32F10X_LD",
                 // "USE_STDPERIPH_DRIVER"
             ],
-            "compilerPath": "D:\\gnu-arm\\arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-eabi\\bin\\arm-none-eabi-gcc.exe",
+            "compilerPath": "/home/ylad/tools/arm-gnu-toolchain-14.3.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "windows-gcc-arm"
+            "intelliSenseMode": "linux-gcc-arm"
         }
     ],
     "version": 4

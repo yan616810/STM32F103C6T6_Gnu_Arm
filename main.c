@@ -521,7 +521,11 @@ int main(void)
 	// oled_image_binbin();
 /*u8g2单色屏初始化*/
 	u8g2_oled_init(&u8g2);
-	// u8g2_oled_play_Animation(&u8g2);
+while(1)
+{
+	u8g2_oled_play_Animation(&u8g2);
+	
+}
 	u8g2_SetFont(&u8g2,u8g2_font_courB08_tr);//w=7  h=10
 	u8g2_SetFontPosTop(&u8g2);
 	u8g2_SetFontMode(&u8g2,0);//显示字体的背景，不透明
