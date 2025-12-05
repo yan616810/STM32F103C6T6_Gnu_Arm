@@ -4,7 +4,7 @@ ENTRY(Reset_Handler)
 
 MEMORY
 {
-  ROM  : org = 0x08000000, len = (320K)   /* Flash: 32k */
+  ROM  : org = 0x08000000, len = (32K)   /* Flash: 32k */
   RAM  : org = 0x20000000, len =   (10K)   /* SRAM: 10k */
 }
 

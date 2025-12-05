@@ -1,7 +1,7 @@
 /*
 0. 指定唯一的要调试的可执行文件.elf
 1. 指定你所用芯片的SVD文件
-2. 配置 OpenOCD 服务器，配置.cfg目录和选择调试适配器的.cfg和芯片系列的.cfg
+2. 配置 OpenOCD 服务器，指定.cfg目录和选择调试适配器的.cfg和芯片系列的.cfg
 3. 配置 GDB 调试器，指定GDB可执行文件路径和GDB连接OpenOCD服务器的地址
 4. 
 */
@@ -12,7 +12,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "preLaunchTask": "Flash with OpenOCD",
+            "preLaunchTask": "Flash with OpenOCD",          //启动调试前自动执行的任务标签，前提是tasks.json中有对应的任务配置
             "name"              : "Debug with OpenOCD",     //此调试配置名称
             "type"              : "cortex-debug",           //专为 ARM Cortex 设备调试设计
             "request"           : "launch",                 //表示启动新调试会话（而非附加到现有进程
@@ -20,9 +20,9 @@
 /**************************OpenOCD****************************************************/
         /*以下配置用于开启openocd服务器在localhost:3333*/
             "servertype"        : "openocd",                //使用 OpenOCD 作为 GDB-Server
-            "searchDir"         : [//指定 OpenOCD 配置文件搜索路径
-                "/usr/share/openocd/scripts/"
-            ],
+            // "searchDir"         : [//指定 OpenOCD 配置文件搜索路径
+            //     "/usr/share/openocd/scripts/"
+            // ],
             "configFiles"       : [//指定 OpenOCD 配置文件
                 "interface/cmsis-dap.cfg",                  // 调试接口配置文件，例如 ST-Link,cmsis-dap
                 "target/stm32f1x.cfg"                       // 目标设备配置文件，根据你的设备调整

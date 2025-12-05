@@ -28,5 +28,6 @@
         "dma_usart.h": "c",
         "math.h": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": true
+    "cortex-debug.variableUseNaturalFormat": true,
+    "cmake.ignoreCMakeListsMissing": true
 }
