@@ -345,6 +345,7 @@ help :
 	@echo *******************vpath***********************
 	@echo $(sort $(dir $(CSRC)))
 
+#program $< verify exit->烧录后验证；program $< verify reset exit->烧录后验证并复位运行
 flash : $(PROJECT_dir).elf
 	@openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg -c "program $< verify reset exit"
 
